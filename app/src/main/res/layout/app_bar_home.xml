@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:theme="@style/DayTheme"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/DayTheme">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:titleTextColor="@color/white"
+            app:popupTheme="@style/DayTheme" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include layout="@layout/content_home" />
+
+    <ImageView
+        android:id="@+id/alarm_fix"
+        android:layout_width="110dp"
+        android:layout_height="140dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="50dp"
+        android:contentDescription="@string/send_alert"
+        android:src="@drawable/siren1" />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/alarm"
+        android:layout_width="110dp"
+        android:layout_height="140dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="50dp"
+        android:contentDescription="@string/send_alert"
+        android:src="@drawable/siren"
+        android:visibility="gone"
+        android:elevation="10dp"
+        />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
