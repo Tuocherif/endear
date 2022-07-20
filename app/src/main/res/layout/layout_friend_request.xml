@@ -24,7 +24,7 @@
                     android:layout_width="50dp"
                     android:src="@drawable/ic_account"
 
-                    />
+                    android:contentDescription="@string/Friend_image" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -33,13 +33,13 @@
                     android:padding="8dp">
 
                     <TextView
-                        android:id="@+id/tv_user_email"
+                        android:id="@+id/tv_user_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:maxLength="@integer/material_motion_duration_long_1"
-                        android:text="@string/Email_example"
+                        android:text="@string/Name_Placeholder"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -60,7 +60,7 @@
                 android:layout_weight="1"
                 android:outlineAmbientShadowColor="#4CAF50"
                 android:src="@drawable/ic_check"
-                />
+                android:contentDescription="@string/Accept" />
 
             <ImageView
                 android:id="@+id/img_decline"
@@ -69,7 +69,7 @@
                 android:layout_weight="1"
                 android:outlineAmbientShadowColor="@color/accent"
                 android:src="@drawable/ic_clear"
-                />
+                android:contentDescription="@string/Decline" />
 
         </LinearLayout>
 

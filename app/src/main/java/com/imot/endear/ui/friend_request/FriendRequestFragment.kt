@@ -21,7 +21,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.imot.endear.R
-import com.imot.endear.ViewHolder.FriendRequestViewHolder
+import com.imot.endear.viewHolder.FriendRequestViewHolder
 import com.imot.endear.databinding.FragmentFriendrequestBinding
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.model.User
@@ -78,7 +78,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val suggest: List<String> = ArrayList<String>()
+                    val suggest: List<String> = ArrayList()
 
                     for (search in suggestList) {
                         if (search.lowercase()
@@ -134,18 +134,18 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
     private fun loadSearchData() {
 
-        val lstUserEmail = ArrayList<String>()
+        val lstName = ArrayList<String>()
         val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+//            .child(Common.loggedUser!!.uid!!)
             .child(Common.FRIEND_REQUEST)
 
         userList.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (userSnapShot in snapshot.children) {
                     val user = userSnapShot.getValue(User::class.java)
-                    lstUserEmail.add(user?.email!!)
+                    lstName.add(user?.name!!)
                 }
-                onFirebaseLoadUserNameDone(lstUserEmail)
+                onFirebaseLoadUserNameDone(lstName)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -160,7 +160,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .child(Common.loggedUser!!.uid!!)
             .child(Common.FRIEND_REQUEST)
-            .orderByChild("email")
+            .orderByChild("name")
             .startAt(search_string)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
@@ -183,14 +183,14 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                 position: Int,
                 model: User
             ) {
-                holder.tv_user_email.text = model.email
+                holder.tv_user_name.text = model.name
 
                 holder.img_decline.setOnClickListener {
                     //delete Request
 
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Suppression de demande d'ajout")
-                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.email + " de votre liste de demande d'ajout de proches?")
+                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.name + " de votre liste de demande d'ajout de proches?")
                     builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
 
                         deleteFriendRequest(model, true)
@@ -205,7 +205,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                     //Accept request
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Ajout d'un proche")
-                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter " + model.email + " à votre liste de proches?")
+                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter " + model.name + " à votre liste de proches?")
                     builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
 
                         deleteFriendRequest(model, false)
@@ -233,7 +233,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
     private fun loadFriendRequestList() {
 
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+           // .child(Common.loggedUser!!.name!!)
             .child(Common.FRIEND_REQUEST)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
@@ -255,15 +255,15 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                 position: Int,
                 model: User,
             ) {
-                holder.tv_user_email.text = model.email
+                holder.tv_user_name.text = model.name
 
                 holder.img_decline.setOnClickListener {
                     //delete Request
 
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Suppression de demande d'ajout")
-                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.email + " de votre liste de demande d'ajout de proches?")
-                    builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
+                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.name + " de votre liste de demande d'ajout de proches?")
+                    builder.setPositiveButton("Oui") { _: DialogInterface, _: Int ->
 
                         deleteFriendRequest(model, true)
 
@@ -277,7 +277,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                     //Accept request
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Ajout d'un proche")
-                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter " + model.email + " à votre liste de proches?")
+                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter " + model.name + " à votre liste de proches?")
                     builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
 
                         deleteFriendRequest(model, false)
@@ -345,8 +345,8 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
     }
 
 
-    override fun onFirebaseLoadUserNameDone(lstEmail: List<String>) {
-        expandable_search_bar.lastSuggestions = lstEmail
+    override fun onFirebaseLoadUserNameDone(lstName: List<String>) {
+        expandable_search_bar.lastSuggestions = lstName
     }
 
     override fun onFirebaseLoadUserNameFailed(message: String) {

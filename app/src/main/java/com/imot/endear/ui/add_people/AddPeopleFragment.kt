@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.imot.endear.databinding.FragmentFindpeopleBinding
@@ -22,13 +21,14 @@ class AddPeopleFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val slideshowViewModel =
-            ViewModelProvider(this).get(AddPeopleViewModel::class.java)
+        val addPeopleViewModel =
+            ViewModelProvider(this)[AddPeopleViewModel::class.java]
 
         _binding = FragmentFindpeopleBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        slideshowViewModel.text.observe(viewLifecycleOwner) {
+        addPeopleViewModel.text.observe(viewLifecycleOwner) {
+
         }
         return root
     }

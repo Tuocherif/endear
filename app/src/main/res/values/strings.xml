@@ -1,23 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Endear</string>
+    <string name="iProtect">iProtect</string>
+    <string name="join">Nous contacter</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="send_alert">ENVOYER UNE ALERTE</string>
-    <string name="Sign_Out">Me déconnecter</string>
-    <string name="Look_around">Chercher un proche</string>
+    <string name="Sign_In">Connexion</string>
+    <string name="Sign_Out">Déconnexion</string>
+    <string name="Sign_In_explanation">Connectez-vous à l\'aide de votre adresse e-mail</string>
+    <string name="Sign_In_with_Google">Connectez-vous avec Google</string>
+    <string name="aeon_corporation">aeon corporation</string>
+    <string name="wait">Veuillez patienter…</string>
+    <string name="find_people">Chercher un proche</string>
     <string name="Notifications">Notifications</string>
-    <string name="Email_search">Rechercher par email</string>
+    <string name="Friend_search">Entrer un nom</string>
+    <string name="Friend_image">Image de l\'ami</string>
     <string name="Email_example">exemple@endear.com</string>
+    <string name="dark_mode">dark_mode</string>
+    <string name="mode">Changer de thème</string>
+    <string name="Name_Placeholder">iProtect Aeon</string>
     <string name="account">Mon compte</string>
     <string name="friend_list">Liste de mes proches</string>
     <string name="location">Ma position actuelle</string>
+    <string name="help">Aide</string>
+    <string name="Accept">Accepter</string>
+    <string name="Decline">Refuser</string>
+    <string name="settings">Paramètres</string>
+    <string name="ImageMenu">ImageMenu</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="title_activity_tracking">TrackingActivity</string>
+    <string name="app_id">1:984878487100:android:333455e6faf59df4add539</string>
+    <string name="web_client_id" translatable="false">984878487100-qud2pslrdmj0ffpn1d6iol0m9nnsgdl6.apps.googleusercontent.com</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="Advanced">Apparence</string>
+    <string name="Website">Site Web</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="checkbox">Check box preferences</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Changer de thème</string>
+    <string name="attachment_summary_on">Cliquer pour changer le thème de l\'application
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
 </resources>

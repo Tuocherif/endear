@@ -1,19 +1,15 @@
 package com.imot.endear.model
 
-import com.google.firebase.database.DataSnapshot
 
-class User {
-    var uid : String? = null
-    var email : String? = null
+class User(uid: String, email: String, name: String) {
+    var uid : String? = uid
+    var email : String? = email
+    var name : String? = name
     var acceptList: HashMap<String,User> // List user friend
 
 
-
-    constructor(uid: String, email: String){
-        this.uid = uid
-        this.email = email
+    init {
         acceptList = HashMap()
-
     }
 
 //    fun getUid() : String{

@@ -19,7 +19,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.imot.endear.ViewHolder.UserViewHolder
+import com.imot.endear.viewHolder.UserViewHolder
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.interfaces.InterfaceRecyclerItemClickListener
 import com.imot.endear.model.MyResponse
@@ -129,10 +129,10 @@ class AllPeopleActivity : AppCompatActivity(), IfirebaseLoadDone {
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
                 if (model.email.equals(Common.loggedUser!!.email)){
-                    holder.tv_user_email.text = StringBuilder(model.email!!).append(" (me)")
-                    holder.tv_user_email.setTypeface(holder.tv_user_email.typeface, Typeface.ITALIC)
+                    holder.tv_user_name.text = StringBuilder(model.email!!).append(" (me)")
+                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_email.setText(StringBuilder(model.email!!))
+                    holder.tv_user_name.setText(StringBuilder(model.email!!))
                 }
 
                 //Event
@@ -169,10 +169,10 @@ class AllPeopleActivity : AppCompatActivity(), IfirebaseLoadDone {
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
                 if (model.email == Common.loggedUser!!.email){
-                    holder.tv_user_email.text = StringBuilder(model.email!!).append(" (me)")
-                    holder.tv_user_email.setTypeface(holder.tv_user_email.typeface, Typeface.ITALIC)
+                    holder.tv_user_name.text = StringBuilder(model.email!!).append(" (me)")
+                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_email.text = StringBuilder(model.email!!)
+                    holder.tv_user_name.text = StringBuilder(model.email!!)
                 }
 
                 //Event

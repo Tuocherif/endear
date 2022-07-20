@@ -23,7 +23,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.imot.endear.R
-import com.imot.endear.ViewHolder.UserViewHolder
+import com.imot.endear.viewHolder.UserViewHolder
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.interfaces.InterfaceRecyclerItemClickListener
 import com.imot.endear.model.MyResponse
@@ -51,7 +51,7 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
     lateinit var expandable_search_bar : MaterialSearchBar
 
 
-    var suggestList: List<String> = ArrayList<String>()
+    var suggestList: List<String> = ArrayList()
 
     val compositeDisposable = CompositeDisposable()
     //lateinit var iFCMService:IFCMService
@@ -90,7 +90,6 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                         }
                         expandable_search_bar.lastSuggestions = suggest
                     }
-
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -139,7 +138,7 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
     private fun startSearch(search_string : String){
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .orderByChild("email")
+            .orderByChild("name")
             .startAt(search_string)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
@@ -154,11 +153,11 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                if (model.email.equals(Common.loggedUser!!.email)){
-                    holder.tv_user_email.text = StringBuilder(model.email!!).append(" (me)")
-                    holder.tv_user_email.setTypeface(holder.tv_user_email.typeface, Typeface.ITALIC)
+                if (model.name.equals(Common.loggedUser!!.name)){
+                    holder.tv_user_name.text = StringBuilder(model.name!!).append(" (me)")
+                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_email.setText(StringBuilder(model.email!!))
+                    holder.tv_user_name.text = StringBuilder(model.name!!)
                 }
 
                 //Event
@@ -194,11 +193,11 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                if (model.email == Common.loggedUser!!.email){
-                    holder.tv_user_email.text = StringBuilder(model.email!!).append(" (me)")
-                    holder.tv_user_email.setTypeface(holder.tv_user_email.typeface, Typeface.ITALIC)
+                if (model.name == Common.loggedUser!!.name){
+                    holder.tv_user_name.text = StringBuilder(model.name!!).append(" (moi)")
+                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_email.text = StringBuilder(model.email!!)
+                    holder.tv_user_name.text = StringBuilder(model.name!!)
                 }
 
                 //Event
@@ -206,13 +205,9 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                 holder.setClick(object  : InterfaceRecyclerItemClickListener{
                     override fun onItemClickListener(view: View, position: Int) {
                         showDialogRequest(model)
-
-
                     }
-
                 })
             }
-
         }
 
         adapter!!.startListening()
@@ -223,9 +218,9 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
         val alertDialog = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
         alertDialog.apply {
             setTitle("Ajouter un proche")
-            setMessage("Souhaitez-vous envoyer une demande d'ajout à "+model.email+" ?")
+            setMessage("Souhaitez-vous envoyer une demande d'ajout à "+model.name+" ?")
             setIcon(R.drawable.ic_person_add)
-            setNegativeButton("Annuler", {dialogInterface, _-> dialogInterface.dismiss()})
+            setNegativeButton("Annuler") { dialogInterface, _ -> dialogInterface.dismiss() }
 
             alertDialog.setPositiveButton("Envoyer"){_, _->
                 val acceptList = FirebaseDatabase.getInstance()
@@ -242,7 +237,7 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                                 sendFriendRequest(model)
 
                             }else{
-                                Toast.makeText(context, model.email+"est déjà présent dans la liste de vos proches.",Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, model.name+"est déjà présent dans la liste de vos proches.",Toast.LENGTH_SHORT).show()
                             }
                         }
 
@@ -276,8 +271,10 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                         val dataSend = HashMap<String,String>()
                         dataSend[Common.FROM_UID] = Common.loggedUser!!.uid!! //sender's uid
                         dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email!! //sender's email
+                        dataSend[Common.FROM_NAME] = Common.loggedUser!!.name!! //sender's name
                         dataSend[Common.TO_UID] = model.uid!! //receiver's uid
                         dataSend[Common.TO_EMAIL] = model.email!! //receiver's email
+                        dataSend[Common.TO_NAME] = model.name!! //receiver's name
 
                         //set request
                         request.to = snapshot.child(model.uid!!).getValue(String::class.java)!!
@@ -311,16 +308,16 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
     fun loadSearchData(){
 
-        val lstUserEmail = ArrayList<String>()
+        val lstUserName = ArrayList<String>()
         val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
 
         userList.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (userSnapShot in snapshot.children){
                     val user = userSnapShot.getValue(User::class.java)
-                    lstUserEmail.add(user?.email!!)
+                    lstUserName.add(user?.name!!)
                 }
-                onFirebaseLoadUserNameDone(lstUserEmail)
+                onFirebaseLoadUserNameDone(lstUserName)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -341,8 +338,8 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
         compositeDisposable.clear()
         super.onStop()
     }
-    override fun onFirebaseLoadUserNameDone(lstEmail: List<String>) {
-        expandable_search_bar.lastSuggestions = lstEmail
+    override fun onFirebaseLoadUserNameDone(lstName: List<String>) {
+        expandable_search_bar.lastSuggestions = lstName
     }
 
     override fun onFirebaseLoadUserNameFailed(message: String) {

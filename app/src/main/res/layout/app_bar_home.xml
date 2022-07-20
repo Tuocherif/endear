@@ -7,18 +7,23 @@
     android:layout_height="match_parent"
     tools:context=".HomeActivity">
 
+<!--    <androidx.appcompat.widget.Toolbar-->
+<!--        android:id="@+id/toolbar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="?attr/actionBarSize"-->
+<!--        android:background="@color/primary_dark"-->
+<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/nav_host_fragment_content_home"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:popupTheme="@style/DayTheme"-->
+<!--        app:titleTextColor="@color/white" />-->
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/DayTheme">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            app:titleTextColor="@color/white"
-            app:popupTheme="@style/DayTheme" />
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -46,5 +51,36 @@
         android:visibility="gone"
         android:elevation="10dp"
         />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="5dp"
+        app:cardCornerRadius="40dp"
+        app:cardElevation="0dp">
+
+        <ImageView
+            android:id="@+id/ImageMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/ImageMenu"
+            android:scaleType="centerCrop"
+            app:layout_anchorGravity="end|bottom"
+            app:srcCompat="@drawable/ic_account" />
+
+
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="55dp"
+        app:srcCompat="@drawable/menu_blue3"
+        android:contentDescription="@string/ImageMenu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

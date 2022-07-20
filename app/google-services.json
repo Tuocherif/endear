@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "984878487100-optc653m6as2tltgidbljnk28vhe0dmm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imot.endear",
+            "certificate_hash": "10dc04dd88a62f2c8d3159349f25a991e7b0bdd1"
+          }
+        },
+        {
           "client_id": "984878487100-qud2pslrdmj0ffpn1d6iol0m9nnsgdl6.apps.googleusercontent.com",
           "client_type": 3
         }

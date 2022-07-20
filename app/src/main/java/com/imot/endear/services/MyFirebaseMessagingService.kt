@@ -75,7 +75,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             .child(data[Common.TO_UID]!!)
             .child(Common.FRIEND_REQUEST)
 
-        val user = User(data[Common.FROM_UID]!!,data[Common.FROM_EMAIL]!!)
+        val user = User(data[Common.FROM_UID]!!,data[Common.FROM_EMAIL]!!, data[Common.FROM_NAME]!!)
         friend_request.child(user.uid!!).setValue(user)
     }
 }

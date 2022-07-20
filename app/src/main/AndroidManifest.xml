@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:versionCode="1"
     android:versionName="1.0">
-
     <!-- <uses-sdk -->
     <!-- android:minSdkVersion="28" -->
     <!-- android:targetSdkVersion="32" -->
@@ -80,7 +79,7 @@
             android:name=".HomeActivity"
             android:exported="false"
             android:label="@string/title_activity_home"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/DayTheme" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -101,6 +100,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_application_id" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <activity
             android:name="com.firebase.ui.auth.KickoffActivity"
@@ -188,6 +190,9 @@
         <uses-library
             android:name="androidx.window.sidecar"
             android:required="false" />
+        <uses-library
+            android:name="com.google.android.gms.common.api"
+            android:required="false" />
 
         <activity
             android:name="com.karumi.dexter.DexterActivity"
@@ -225,11 +230,13 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:directBootAware="true"
             android:exported="false">
+            <meta-data
+                android:name="com.google.android.gms.games.APP_ID"
+                android:value="@string/app_id" />
             <meta-data
                 android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
@@ -325,7 +332,8 @@
         <activity
             android:name="com.google.android.gms.common.api.GoogleApiActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:value="@string/app_id" />
 
         <provider
             android:name="com.google.firebase.provider.FirebaseInitProvider"
@@ -383,9 +391,7 @@
         <receiver
             android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
             android:exported="false" />
-
-        <receiver
-            android:name=".services.MyLocationReceiver"/>
+        <receiver android:name=".services.MyLocationReceiver" />
     </application>
 
 </manifest>

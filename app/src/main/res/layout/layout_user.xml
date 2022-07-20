@@ -28,13 +28,13 @@
             android:padding="8dp">
 
             <TextView
-                android:id="@+id/tv_user_email"
+                android:id="@+id/tv_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:maxLength="@integer/material_motion_duration_long_1"
-                android:text="@string/Email_example"
+                android:text="@string/Name_Placeholder"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 

@@ -10,7 +10,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -23,14 +22,15 @@ import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.imot.endear.R
 import com.imot.endear.TrackingActivity
-import com.imot.endear.ViewHolder.UserViewHolder
-import com.imot.endear.databinding.FragmentFriendsListBinding
+import com.imot.endear.viewHolder.UserViewHolder
+import com.imot.endear.databinding.FragmentFriendslistBinding
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.interfaces.InterfaceRecyclerItemClickListener
 import com.imot.endear.model.User
@@ -40,23 +40,23 @@ import com.mancj.materialsearchbar.MaterialSearchBar
 
 class FriendsListFragment : Fragment(), IfirebaseLoadDone {
 
-    private var _binding: FragmentFriendsListBinding? = null
+    private var _binding: FragmentFriendslistBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
 
-    var searchAdapter: FirebaseRecyclerAdapter<User, UserViewHolder>? = null
+    private var searchAdapter: FirebaseRecyclerAdapter<User, UserViewHolder>? = null
     var adapter : FirebaseRecyclerAdapter<User, UserViewHolder>? = null
 
     lateinit var recyclerFriendsList : RecyclerView
-    lateinit var firebaseLoadDone : IfirebaseLoadDone
+    private lateinit var firebaseLoadDone : IfirebaseLoadDone
     lateinit var expandable_search_bar : MaterialSearchBar
-    lateinit var locationRequest : LocationRequest
-    lateinit var fusedLocationProviderClient : FusedLocationProviderClient
+    private lateinit var locationRequest : LocationRequest
+    private lateinit var fusedLocationProviderClient : FusedLocationProviderClient
 
 
-    var suggestList: List<String> = ArrayList<String>()
+    var suggestList: List<String> = ArrayList()
 
 
     override fun onCreateView(
@@ -67,7 +67,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
         val FriendsListViewModel =
             ViewModelProvider(this)[FriendsListViewModel::class.java]
 
-        _binding = FragmentFriendsListBinding.inflate(inflater, container, false)
+        _binding = FragmentFriendslistBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
 
@@ -83,7 +83,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val suggest: List<String> = ArrayList<String>()
+                    val suggest: List<String> = ArrayList()
 
                     for (search in suggestList){
                         if (search.lowercase().contentEquals(expandable_search_bar.text.lowercase())){
@@ -148,8 +148,8 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
                 requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
+//             TODO: Consider calling
+//                ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
@@ -175,13 +175,13 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             smallestDisplacement = 10f
             fastestInterval = 3000
             interval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_HIGH_ACCURACY
         }
 
     }
 
-    override fun onFirebaseLoadUserNameDone(lstEmail: List<String>) {
-        expandable_search_bar.lastSuggestions = lstEmail
+    override fun onFirebaseLoadUserNameDone(lstName:List<String>) {
+        expandable_search_bar.lastSuggestions = lstName
     }
 
     override fun onFirebaseLoadUserNameFailed(message: String) {
@@ -192,7 +192,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .child(Common.loggedUser!!.uid!!)
             .child(Common.ACCEPT_LIST)
-            .orderByChild("email")
+            .orderByChild("name")
             .startAt(search_string)
 
 
@@ -208,7 +208,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                holder.tv_user_email.text = model.email
+                holder.tv_user_name.text = model.name
 
                 //Event
 
@@ -232,7 +232,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
 
     }
 
-    fun loadFriendList(){
+    private fun loadFriendList(){
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .child(Common.loggedUser!!.uid!!)
             .child(Common.ACCEPT_LIST)
@@ -249,7 +249,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                holder.tv_user_email.text = model.email
+                holder.tv_user_name.text = model.name
 
                 //Event
 
@@ -274,9 +274,9 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
         recyclerFriendsList.adapter = adapter
     }
 
-    fun loadSearchData(){
+    private fun loadSearchData(){
 
-        val lstUserEmail = ArrayList<String>()
+        val lstUserName= ArrayList<String>()
         val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .child(Common.loggedUser!!.uid!!)
             .child(Common.ACCEPT_LIST)
@@ -286,9 +286,9 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (userSnapShot in snapshot.children){
                     val user = userSnapShot.getValue(User::class.java)
-                    lstUserEmail.add(user?.email!!)
+                    lstUserName.add(user?.name!!)
                 }
-                onFirebaseLoadUserNameDone(lstUserEmail)
+                onFirebaseLoadUserNameDone(lstUserName)
             }
 
             override fun onCancelled(error: DatabaseError) {

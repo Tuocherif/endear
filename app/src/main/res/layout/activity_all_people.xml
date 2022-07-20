@@ -10,15 +10,18 @@
 
     <com.mancj.materialsearchbar.MaterialSearchBar
         android:id="@+id/expandable_search_bar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:mt_hint="@string/Email_search"
-        app:mt_maxSuggestionsCount="50" />
+        android:layout_marginStart="80dp"
+        android:outlineAmbientShadowColor="@color/secondary_text"
+        app:mt_hint="@string/Friend_search"
+        app:mt_maxSuggestionsCount="50"/>
 
     <View
         android:id="@+id/search_view"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="3dp"
+        android:layout_marginStart="80dp"
         android:background="@color/secondary_text"
         />
     <androidx.recyclerview.widget.RecyclerView

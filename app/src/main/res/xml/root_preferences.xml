@@ -1,0 +1,47 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/messages_header">
+
+
+<!--        <RingtonePreference-->
+<!--            app:defaultValue="false"-->
+<!--            app:entries="@array/reply_entries"-->
+<!--            app:entryValues="@array/reply_values"-->
+<!--            app:key="checkbox"-->
+<!--            app:title="@string/checkbox"-->
+<!--            app:useSimpleSummaryProvider="true" />-->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/Advanced">
+
+
+        <ListPreference
+            android:icon="@drawable/ic_appearence"
+            app:key="dark_mode"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="1"
+            android:entries="@array/dark_mode_entries"
+            android:entryValues="@array/dark_mode_entries_values"
+            app:title="@string/attachment_title" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:title="@string/Website">
+        <PreferenceCategory
+            app:summary="Site web du développeur"
+            >
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://..."/>
+
+        </PreferenceCategory>
+
+    </PreferenceCategory>
+
+
+
+
+</PreferenceScreen>

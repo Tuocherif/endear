@@ -11,10 +11,17 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/nav_friends_list"
+        android:name="com.imot.endear.ui.friends_list.FriendsListFragment"
+        android:label="@string/friend_list"
+        tools:layout="@layout/fragment_friendslist" />
+
+    <fragment
         android:id="@+id/nav_find_people"
         android:name="com.imot.endear.ui.find_people.FindPeopleFragment"
-        android:label="@string/Look_around"
+        android:label="@string/find_people"
         tools:layout="@layout/fragment_findpeople" />
+
 
     <fragment
         android:id="@+id/nav_friend_request"
@@ -22,15 +29,18 @@
         android:label="@string/Notifications"
         tools:layout="@layout/fragment_friendrequest" />
 
+
     <fragment
-        android:id="@+id/nav_friend_list"
-        android:name="com.imot.endear.ui.add_people.AddPeopleFragment"
-        android:label="@string/friend_list"
-        tools:layout="@layout/fragment_friends_list" />
+        android:id="@+id/nav_settings"
+        android:name="com.imot.endear.ui.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/settings_activity" />
+
+
 
     <fragment
         android:id="@+id/nav_sign_out"
-        android:name="com.imot.endear.ui.add_people.AddPeopleFragment"
+        android:name="com.imot.endear.ui.sign_out_fragment.SignOutFragment"
         android:label="@string/Sign_Out"
-        tools:layout="@layout/fragment_addpeople" />
+        tools:layout="@layout/fragment_sign_out" />
 </navigation>
