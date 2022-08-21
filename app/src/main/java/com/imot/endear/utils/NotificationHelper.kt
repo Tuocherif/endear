@@ -43,7 +43,7 @@ class NotificationHelper(base:Context):ContextWrapper(base) {
                 .build()
             edmtChannel.setSound(defaultUri!!,audioAttributes)
 
-            getManager()!!.createNotificationChannel(edmtChannel)
+            getManager().createNotificationChannel(edmtChannel)
     }
 
     fun getManager(): NotificationManager {

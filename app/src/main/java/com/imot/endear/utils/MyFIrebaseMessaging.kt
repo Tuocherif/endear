@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import android.os.Message
 import android.util.Log
@@ -38,7 +39,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
             notificationChannel.description = "Description"
             notificationChannel.enableLights(true)
-           // notificationChannel.lightColor = Color.RED
+           notificationChannel.lightColor = Color.RED
             notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
             notificationChannel.enableVibration(true)
             notificationManager.createNotificationChannel(notificationChannel)

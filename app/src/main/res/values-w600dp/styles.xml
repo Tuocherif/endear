@@ -12,15 +12,31 @@
             <!-- Status bar color. -->
             <item name="android:statusBarColor">?attr/divider</item>
             <!-- Customize your theme here. -->
-            <item name="windowActionBar">false</item>
+            <item name="windowActionBar">true</item>
             <item name="windowNoTitle">true</item>
 
         </style>
 
         <!-- Base application theme. -->
 
+
+    <style name="dark_theme" parent="ThemeOverlay.AppCompat.Dark">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/primary_light</item>
+        <item name="colorPrimaryVariant">@color/dark_blue</item>
+        <item name="colorOnPrimary">@color/primary_text</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/primary_dark</item>
+        <item name="colorSecondaryVariant">@color/primary_light</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" >@color/black_overlay</item>
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="MyRequestDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorOnPrimary">@color/primary_light</item>
+        <item name="colorOnPrimary">@color/accent</item>
     </style>
 
     <style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat">
@@ -40,6 +56,28 @@
         <item name="windowNoTitle">true</item>
 
     </style>
+
+    <style name="AlertTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorPrimary">@color/prima</item>
+        <item name="colorPrimaryVariant">@color/primary_dar</item>
+        <item name="colorOnPrimary">@color/primary_lig</item>
+        <item name="colorSecondary">@color/ace</item>
+        <item name="colorSecondaryVariant">@color/primary_tex</item>
+        <item name="colorOnSecondary">@color/secondary_tex</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:navigationBarColor">@color/divide</item>
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="CustomSnackbarTheme">
+        <item name="snackbarStyle">@style/MySnackBarStyle</item>
+    </style>
+
+    <style name="MySnackBarStyle" parent="Widget.MaterialComponents.Snackbar">
+        <item name="android:background">@color/red</item>
+    </style>
+
 
 
 </resources>

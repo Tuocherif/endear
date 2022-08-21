@@ -154,10 +154,10 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
                 if (model.name.equals(Common.loggedUser!!.name)){
-                    holder.tv_user_name.text = StringBuilder(model.name!!).append(" (me)")
+                    holder.tv_user_name.text = StringBuilder(model.name).append(" (me)")
                     holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_name.text = StringBuilder(model.name!!)
+                    holder.tv_user_name.text = StringBuilder(model.name)
                 }
 
                 //Event
@@ -194,10 +194,10 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
                 if (model.name == Common.loggedUser!!.name){
-                    holder.tv_user_name.text = StringBuilder(model.name!!).append(" (moi)")
+                    holder.tv_user_name.text = StringBuilder(model.name).append(" (moi)")
                     holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_name.text = StringBuilder(model.name!!)
+                    holder.tv_user_name.text = StringBuilder(model.name)
                 }
 
                 //Event
@@ -225,7 +225,7 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             alertDialog.setPositiveButton("Envoyer"){_, _->
                 val acceptList = FirebaseDatabase.getInstance()
                     .getReference(Common.USER_INFORMATION)
-                    .child(Common.loggedUser!!.uid!!)
+                    .child(Common.loggedUser!!.uid)
                     .child(Common.ACCEPT_LIST)
 
                 //Chek from actual user friend list to make sure is not friend before
@@ -235,7 +235,6 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                             if (snapshot.value == null)//not yet friend
                             {
                                 sendFriendRequest(model)
-
                             }else{
                                 Toast.makeText(context, model.name+"est déjà présent dans la liste de vos proches.",Toast.LENGTH_SHORT).show()
                             }
@@ -269,15 +268,17 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                         //Create request
                         val request = Request()
                         val dataSend = HashMap<String,String>()
-                        dataSend[Common.FROM_UID] = Common.loggedUser!!.uid!! //sender's uid
-                        dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email!! //sender's email
-                        dataSend[Common.FROM_NAME] = Common.loggedUser!!.name!! //sender's name
-                        dataSend[Common.TO_UID] = model.uid!! //receiver's uid
-                        dataSend[Common.TO_EMAIL] = model.email!! //receiver's email
-                        dataSend[Common.TO_NAME] = model.name!! //receiver's name
+                        dataSend[Common.FROM_UID] = Common.loggedUser!!.uid //sender's uid
+                        dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email //sender's email
+                        dataSend[Common.FROM_NAME] = Common.loggedUser!!.name //sender's name
+                        dataSend[Common.FROM_IMAGE] = Common.loggedUser!!.image //sender's image
+                        dataSend[Common.TO_UID] = model.uid //receiver's uid
+                        dataSend[Common.TO_EMAIL] = model.email //receiver's email
+                        dataSend[Common.TO_NAME] = model.name //receiver's name
+                        dataSend[Common.TO_IMAGE] = model.image //receiver's image
 
                         //set request
-                        request.to = snapshot.child(model.uid!!).getValue(String::class.java)!!
+                        request.to = snapshot.child(model.uid).getValue(String::class.java)!!
                         request.data = dataSend
 
                         //send

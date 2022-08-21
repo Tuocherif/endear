@@ -8,16 +8,10 @@
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
         android:title="@string/menu_home" />
-    </group>
-
-    <group android:checkableBehavior="single">
         <item
-            android:title="@string/account"/>
-
-    <item
-        android:id="@+id/nav_friends_list"
-        android:icon="@drawable/ic_playlist_check"
-        android:title="@string/friend_list" />
+            android:id="@+id/nav_friends_list"
+            android:icon="@drawable/ic_playlist_check"
+            android:title="@string/friend_list" />
 
 
         <item
@@ -28,12 +22,11 @@
 
         <item
             android:id="@+id/nav_friend_request"
-            android:icon="@drawable/ic_person_add"
+            android:icon="@drawable/ic_baseline_notifications_active_24"
             android:title="@string/Notifications" />
 
-
-
     </group>
+    
 
     <group android:checkableBehavior="single">
         <item
@@ -58,6 +51,15 @@
             android:icon="@drawable/ic_sign_out"
             android:title="@string/Sign_Out" />
 
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:title="@string/game"/>
+        <item
+            android:id="@+id/nav_game"
+            android:icon="@drawable/ic_game"
+            android:title="@string/menu_game" />
     </group>
 
 </menu>

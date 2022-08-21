@@ -34,7 +34,7 @@
         android:id="@+id/nav_settings"
         android:name="com.imot.endear.ui.settings.SettingsFragment"
         android:label="@string/settings"
-        tools:layout="@layout/settings_activity" />
+        tools:layout="@layout/fragment_settings"/>
 
 
 
@@ -43,4 +43,10 @@
         android:name="com.imot.endear.ui.sign_out_fragment.SignOutFragment"
         android:label="@string/Sign_Out"
         tools:layout="@layout/fragment_sign_out" />
+
+    <fragment
+        android:id="@+id/nav_game"
+        android:name="com.imot.endear.ui.endear.EndearFragment"
+        android:label="@string/endear"
+        tools:layout="@layout/fragment_endear" />
 </navigation>

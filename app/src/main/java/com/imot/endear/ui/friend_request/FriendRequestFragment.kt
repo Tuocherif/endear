@@ -1,6 +1,11 @@
 package com.imot.endear.ui.friend_request
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.os.Bundle
 import android.text.Editable
@@ -9,24 +14,36 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.imot.endear.HomeActivity
+import com.imot.endear.MainActivity
 import com.imot.endear.R
-import com.imot.endear.viewHolder.FriendRequestViewHolder
+import com.imot.endear.TrackingActivity
 import com.imot.endear.databinding.FragmentFriendrequestBinding
+import com.imot.endear.databinding.FragmentSettingsBinding
+import com.imot.endear.viewHolder.FriendRequestViewHolder
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.model.User
+import com.imot.endear.ui.add_people.AddPeopleFragment
+import com.imot.endear.ui.find_people.FindPeopleFragment
+import com.imot.endear.ui.friends_list.FriendsListFragment
+import com.imot.endear.ui.sign_out_fragment.SignOutFragment
 import com.imot.endear.utils.Common
 import com.mancj.materialsearchbar.MaterialSearchBar
+import java.lang.reflect.Array.getInt
 
 class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
@@ -43,6 +60,8 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
     lateinit var recycler_friend_request: RecyclerView
     lateinit var firebaseLoadDone: IfirebaseLoadDone
     lateinit var expandable_search_bar: MaterialSearchBar
+    lateinit var sharedPreferences: SharedPreferences
+
 
 
     var suggestList: List<String> = ArrayList<String>()
@@ -59,6 +78,8 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
             container,
             false)
         val root: View = binding.root
+
+        sharedPreferences = requireContext().getSharedPreferences("custom_theme", Context.MODE_PRIVATE)
 
         //val textView: TextView = binding.tvFindPeople
         FriendRequestViewModel.text.observe(viewLifecycleOwner) {
@@ -127,10 +148,40 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
             firebaseLoadDone = this
 
             loadFriendRequestList()
+            loadFriendAlertList()
             loadSearchData()
         }
         return root
     }//end onCreate
+
+    @SuppressLint("RestrictedApi")
+    private fun reset() {
+        var intent = Intent(getApplicationContext(), Activity::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), MainActivity::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), HomeActivity::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), FriendsListFragment::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), FragmentSettingsBinding::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), FindPeopleFragment::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), AddPeopleFragment::class.java)
+        startActivity(intent)
+
+        intent = Intent(getApplicationContext(), SignOutFragment::class.java)
+        startActivity(intent)
+
+    }
+
 
     private fun loadSearchData() {
 
@@ -138,6 +189,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
         val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
 //            .child(Common.loggedUser!!.uid!!)
             .child(Common.FRIEND_REQUEST)
+            .child(Common.FRIEND_ALERT)
 
         userList.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -158,8 +210,9 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
     private fun startSearch(search_string: String) {
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+            .child(Common.loggedUser!!.uid)
             .child(Common.FRIEND_REQUEST)
+            .child(Common.FRIEND_ALERT)
             .orderByChild("name")
             .startAt(search_string)
 
@@ -184,14 +237,15 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                 model: User
             ) {
                 holder.tv_user_name.text = model.name
+                holder.tv_user_alert.text = model.name
 
                 holder.img_decline.setOnClickListener {
                     //delete Request
 
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Suppression de demande d'ajout")
-                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.name + " de votre liste de demande d'ajout de proches?")
-                    builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
+                    builder.setMessage("Êtes-vous sûr de vouloir supprimer " + model.name + " de votre liste de demande d'ajout de proches ?")
+                    builder.setPositiveButton("Oui") { _: DialogInterface, _: Int ->
 
                         deleteFriendRequest(model, true)
 
@@ -205,8 +259,9 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                     //Accept request
                     val builder = AlertDialog.Builder(requireContext(), R.style.MyRequestDialog)
                     builder.setTitle("Ajout d'un proche")
-                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter " + model.name + " à votre liste de proches?")
-                    builder.setPositiveButton("Oui") { dialogInterface: DialogInterface, id: Int ->
+                    builder.setMessage("Attention!! Cette personne aura accès à votre localisation en permanence.\n\nÊtes-vous sûr de vouloir ajouter "
+                            + model.name + " à votre liste de proches?")
+                    builder.setPositiveButton("Oui") { _: DialogInterface, _: Int ->
 
                         deleteFriendRequest(model, false)
                         addToAcceptList(model)// Add sender to receiver FriendList
@@ -218,8 +273,23 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                     }
 
                 }
-            }
 
+                holder.alert.setOnClickListener {view ->
+                    //Initiate singular tracking
+                    Intent(context, TrackingActivity::class.java).also {
+                startActivity(it)
+                        val editor = sharedPreferences.edit()
+                        editor.putBoolean("AlertTheme", true).apply()
+                        context?.setTheme(R.style.AlertTheme)
+                        //reset()
+            }
+                    Snackbar.make(view, "            !!! Alerte d'urgence !!!", Snackbar.LENGTH_LONG)
+                        .setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.accent))
+                        .setAction("Action", null)
+                        .show()
+                }
+
+            }
 
         }
 
@@ -235,6 +305,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
            // .child(Common.loggedUser!!.name!!)
             .child(Common.FRIEND_REQUEST)
+            .child(Common.FRIEND_ALERT)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
             .setQuery(query, User::class.java)
@@ -256,6 +327,12 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
                 model: User,
             ) {
                 holder.tv_user_name.text = model.name
+
+                val bitmap = getInt(holder.tv_user_image, 0)
+                holder.tv_user_image.setImageResource(bitmap)
+
+                val bitmap_alert = getInt(holder.tv_user_image_alert, 0)
+                holder.tv_user_image_alert.setImageResource(bitmap_alert)
 
                 holder.img_decline.setOnClickListener {
                     //delete Request
@@ -299,32 +376,69 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
     }
 
+    private fun loadFriendAlertList() {
+
+        val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
+            // .child(Common.loggedUser!!.name!!)
+            .child(Common.FRIEND_ALERT)
+
+        val options = FirebaseRecyclerOptions.Builder<User>()
+            .setQuery(query, User::class.java)
+            .build()
+
+        adapter = object : FirebaseRecyclerAdapter<User, FriendRequestViewHolder>(options) {
+            override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int,
+            ): FriendRequestViewHolder {
+                val itemView = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.layout_friend_request, parent, false)
+                return FriendRequestViewHolder(itemView)
+            }
+
+            override fun onBindViewHolder(
+                holder: FriendRequestViewHolder,
+                position: Int,
+                model: User,
+            ) {
+                holder.tv_user_alert.text = model.name
+
+            }
+
+        }
+        adapter!!.startListening()
+        recycler_friend_request.adapter = adapter
+
+
+    }
+
+
     private fun addUserToFriendContact(model: User) {
         val acceptList = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(model.uid!!)
+            .child(model.uid)
             .child(Common.ACCEPT_LIST)
 
-        acceptList.child(Common.loggedUser!!.uid!!).setValue(Common.loggedUser)
+        acceptList.child(Common.loggedUser!!.uid).setValue(Common.loggedUser)
 
     }
 
     private fun addToAcceptList(model: User) {
         val acceptList = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+            .child(Common.loggedUser!!.uid)
             .child(Common.ACCEPT_LIST)
 
-        acceptList.child(model.uid!!).setValue(model)
+        acceptList.child(model.uid).setValue(model)
     }
 
     private fun deleteFriendRequest(model: User, isShowMessage: Boolean) {
         val friendRequest = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+            .child(Common.loggedUser!!.uid)
             .child(Common.FRIEND_REQUEST)
 
-        friendRequest.child(model.uid!!).removeValue()
+        friendRequest.child(model.uid).removeValue()
             .addOnSuccessListener {
                 if (isShowMessage) {
                     Toast.makeText(context,

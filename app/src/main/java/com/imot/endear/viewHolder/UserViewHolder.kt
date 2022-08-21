@@ -21,7 +21,7 @@ class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),View.On
     init {
         tv_user_name = itemView.findViewById(R.id.tv_user_name) as TextView
 
-        itemView.setOnClickListener(View.OnClickListener {  this})
+        itemView.setOnClickListener({this})
     }
      fun UserViewHolder ( itemView: View){
          tv_user_name = itemView.findViewById(R.id.tv_user_name)

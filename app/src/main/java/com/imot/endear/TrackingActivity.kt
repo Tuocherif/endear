@@ -22,7 +22,7 @@ class TrackingActivity : AppCompatActivity(), OnMapReadyCallback, ValueEventList
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTrackingBinding
 
-    lateinit var trackingUserLocation : DatabaseReference
+    private lateinit var trackingUserLocation : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

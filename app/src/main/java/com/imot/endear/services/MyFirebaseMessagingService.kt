@@ -4,8 +4,8 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import androidx.browser.trusted.NotificationApiHelperForM
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -32,6 +32,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         if (message.data != null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                 sendNotificationWithChannel(message)
+                sendAlert(message)
             }else{
                 sendNotification(message)
             }
@@ -59,14 +60,33 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         val title = "Demande de proche"
         val content = "Nouvelle demande d'ami de "+data[Common.FROM_EMAIL]
 
-        val helper: NotificationHelper = NotificationHelper(this)
+        val helper = NotificationHelper(this)
         val builder:Notification.Builder =  helper.getRealTimeTrackingNotification(title,content)
 
-        helper.getManager()!!.notify(Random().nextInt(),builder.build())
-
-
-
+        helper.getManager().notify(Random().nextInt(),builder.build())
     }
+
+    fun sendAlert(message: RemoteMessage) {
+        val data = message.data
+        val title = "${Common.fireBaseUser} vous a envoyé un message d'alerte"
+        val content = "Alerte de "+data[Common.FROM_EMAIL]
+
+        val helper = NotificationHelper(this)
+        val builder:Notification.Builder =  helper.getRealTimeTrackingNotification(title,content)
+
+        helper.getManager().notify(Random().nextInt(),builder.build())
+    }
+
+//    fun receiveAlert(message: RemoteMessage) {
+//        val data = message.data
+//        val title = "${Common.fireBaseUser} vous a envoyé un message d'alerte"
+//        val content = "Alerte de "+data[Common.FROM_EMAIL]
+//
+//        val helper = NotificationHelper(this)
+//        val builder:Notification.Builder =  helper.getRealTimeTrackingNotification(title,content)
+//
+//        helper.getManager().notify(Random().nextInt(),builder.build())
+//    }
 
     private fun addRequestToUserInformation(data: Map<String, String>) {
         //Pending Request
@@ -74,8 +94,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             .getReference(Common.USER_INFORMATION)
             .child(data[Common.TO_UID]!!)
             .child(Common.FRIEND_REQUEST)
+            .child(Common.FRIEND_ALERT)
 
-        val user = User(data[Common.FROM_UID]!!,data[Common.FROM_EMAIL]!!, data[Common.FROM_NAME]!!)
-        friend_request.child(user.uid!!).setValue(user)
+        val user = User(data[Common.FROM_UID]!!,data[Common.FROM_EMAIL]!!, data[Common.FROM_NAME]!!,data[Common.FROM_IMAGE]!!)
+        friend_request.child(user.uid).setValue(user)
     }
+
+
 }

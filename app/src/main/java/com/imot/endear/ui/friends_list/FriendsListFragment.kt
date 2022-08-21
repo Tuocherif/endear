@@ -1,6 +1,7 @@
 package com.imot.endear.ui.friends_list
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -36,6 +37,8 @@ import com.imot.endear.interfaces.InterfaceRecyclerItemClickListener
 import com.imot.endear.model.User
 import com.imot.endear.services.MyLocationReceiver
 import com.imot.endear.utils.Common
+import com.imot.endear.utils.Common.fireBaseUser
+import com.imot.endear.utils.Common.loggedUser
 import com.mancj.materialsearchbar.MaterialSearchBar
 
 class FriendsListFragment : Fragment(), IfirebaseLoadDone {
@@ -139,6 +142,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
         return root
     }//end onCreate
 
+    @SuppressLint("MissingPermission")
     private fun updateLocation() {
         buildLocationRequest()
 
@@ -233,8 +237,13 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
     }
 
     private fun loadFriendList(){
+        loggedUser =
+        User(fireBaseUser!!.uid,
+            fireBaseUser.email!!,
+            fireBaseUser.displayName!!,
+        fireBaseUser.photoUrl!!.toString())
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid!!)
+            .child(loggedUser!!.uid)
             .child(Common.ACCEPT_LIST)
 
         val options = FirebaseRecyclerOptions.Builder<User>()

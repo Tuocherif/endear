@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Endear</string>
+    <string name="endear">Endear Tic Tac Toe</string>
     <string name="iProtect">iProtect</string>
     <string name="join">Nous contacter</string>
     <string name="title_activity_home">HomeActivity</string>
@@ -20,10 +21,18 @@
     <string name="Friend_search">Entrer un nom</string>
     <string name="Friend_image">Image de l\'ami</string>
     <string name="Email_example">exemple@endear.com</string>
+    <string name="Player_One">Joueur 1</string>
+    <string name="Player_Two">Joueur 2</string>
+    <string name="Player1">Joueur 1 gagne !</string>
+    <string name="Player2">Joueur 2 gagne !</string>
+    <string name="Player0">Aucun gagnant !</string>
+    <string name="zero">0</string>
+    <string name="ResetGame">Nouvelle Partie</string>
     <string name="dark_mode">dark_mode</string>
     <string name="mode">Changer de thème</string>
     <string name="Name_Placeholder">iProtect Aeon</string>
     <string name="account">Mon compte</string>
+    <string name="game">Bonus</string>
     <string name="friend_list">Liste de mes proches</string>
     <string name="location">Ma position actuelle</string>
     <string name="help">Aide</string>
@@ -33,6 +42,7 @@
     <string name="ImageMenu">ImageMenu</string>
 
     <string name="menu_home">Home</string>
+    <string name="menu_game">Endear</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="title_activity_tracking">TrackingActivity</string>
@@ -43,8 +53,8 @@
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="Advanced">Apparence</string>
+    <string name="Settings_header">Paramètres</string>
+    <string name="Appearance">Apparence</string>
     <string name="Website">Site Web</string>
 
     <!-- Messages Preferences -->

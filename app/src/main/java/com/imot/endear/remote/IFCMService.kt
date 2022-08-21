@@ -12,5 +12,7 @@ interface IFCMService {
             "authorization:key=AAAA5U9VFjw:APA91bHv9vtGYq78yQP_GfSWppaBVSmOoHo-pZHvj9tCyvpHW-xy-FM-i6Fa5mFGAeSm62fEw1DQC3AeLyHYZ_I49SLpaN4dyGKoPjgFp10N_5fkVSQMRL32jWnrAWSkfEpCYF0d9-Hv")
     @POST("fcm/send")
     fun sendFriendRequestToUser(@Body body: Request): Observable<MyResponse>
+    fun sendFriendAlertToUser(@Body body: Request): Observable<MyResponse>
+    fun sendFriendSafeToUser(@Body body: Request): Observable<MyResponse>
 
     }

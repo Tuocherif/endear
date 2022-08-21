@@ -1,35 +1,37 @@
 package com.imot.endear
 
 import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
-import androidx.biometric.BiometricPrompt
+import android.os.Handler
+import android.os.Looper
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.view.View.VISIBLE
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ScrollView
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -50,7 +52,9 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import io.paperdb.Paper
 
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : AppCompatActivity(),
+    SharedPreferences.OnSharedPreferenceChangeListener  {
 
 
     lateinit var user_information : DatabaseReference
@@ -72,10 +76,53 @@ class MainActivity : AppCompatActivity() {
 //
 //    }
 
+    private val hideHandler = Handler(Looper.myLooper()!!)
+
+    @Suppress("InlinedApi")
+    private val hidePart2Runnable = Runnable {
+        // Delayed removal of status and navigation bar
+
+        // Note that some of these constants are new as of API 16 (Jelly Bean)
+        // and API 19 (KitKat). It is safe to use them, as they are inlined
+        // at compile-time and do nothing on earlier devices.
+        val flags =
+            View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        this?.window?.decorView?.systemUiVisibility = flags
+        (this as? AppCompatActivity)?.supportActionBar?.hide()
+    }
+    private val showPart2Runnable = Runnable {
+        // Delayed display of UI elements
+        fullscreenContentControls?.visibility = View.VISIBLE
+    }
+    private var visible_l: Boolean = false
+    private val hideRunnable = Runnable { hide() }
+
+    /**
+     * Touch listener to use for in-layout UI controls to delay hiding the
+     * system UI. This is to prevent the jarring behavior of controls going away
+     * while interacting with activity UI.
+     */
+    private val delayHideTouchListener = View.OnTouchListener { _, _ ->
+        if (AUTO_HIDE) {
+
+            delayedHide(AUTO_HIDE_DELAY_MILLIS)
+        }
+        false
+    }
+
+    private var dummyButton: Button? = null
+    private var fullscreenContent: View? = null
+    private var fullscreenContentControls: View? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+//        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
         mAuth = FirebaseAuth.getInstance()
 
@@ -123,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                 super.onAuthenticationError(errorCode, errString)
                 Toast.makeText(
                     applicationContext,
-                    "Paramètres biométriques vérifiés",
+                    "Paramètres biométriques non vérifiés",
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
@@ -197,7 +244,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onPermissionDenied(response: PermissionDeniedResponse) {
                     Toast.makeText(
                         this@MainActivity,
-                        "L'application requiert cette permission pour fonctionner.",
+                        "L'application requiert cette permission pour fonctionner correctement.",
                         Toast.LENGTH_LONG
                     ).show()
                     //finish()
@@ -368,6 +415,104 @@ class MainActivity : AppCompatActivity() {
     }//end onCreate
 
 
+    override fun onResume() {
+        super.onResume()
+        this?.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        // Trigger the initial hide() shortly after the activity has been
+        // created, to briefly hint to the user that UI controls
+        // are available.
+        delayedHide(100)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        this?.window?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        // Clear the systemUiVisibility flag
+        this?.window?.decorView?.systemUiVisibility = 0
+        show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dummyButton = null
+        fullscreenContent = null
+        fullscreenContentControls = null
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    private fun toggle() {
+        if (visible_l) {
+            hide()
+        } else {
+            show()
+        }
+    }
+
+    private fun hide() {
+        // Hide UI first
+        fullscreenContentControls?.visibility = View.GONE
+        visible_l = false
+
+        // Schedule a runnable to remove the status and navigation bar after a delay
+        hideHandler.removeCallbacks(showPart2Runnable)
+        hideHandler.postDelayed(hidePart2Runnable, UI_ANIMATION_DELAY.toLong())
+    }
+
+    @Suppress("InlinedApi")
+    private fun show() {
+        // Show the system bar
+        fullscreenContent?.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        visible_l = true
+
+        // Schedule a runnable to display UI elements after a delay
+        hideHandler.removeCallbacks(hidePart2Runnable)
+        hideHandler.postDelayed(showPart2Runnable, UI_ANIMATION_DELAY.toLong())
+        (this as? AppCompatActivity)?.supportActionBar?.show()
+    }
+
+    /**
+     * Schedules a call to hide() in [delayMillis], canceling any
+     * previously scheduled calls.
+     */
+    private fun delayedHide(delayMillis: Int) {
+        hideHandler.removeCallbacks(hideRunnable)
+        hideHandler.postDelayed(hideRunnable, delayMillis.toLong())
+    }
+
+    companion object {
+        /**
+         * Whether or not the system UI should be auto-hidden after
+         * [AUTO_HIDE_DELAY_MILLIS] milliseconds.
+         */
+        private const val AUTO_HIDE = true
+
+        /**
+         * If [AUTO_HIDE] is set, the number of milliseconds to wait after
+         * user interaction before hiding the system UI.
+         */
+        private const val AUTO_HIDE_DELAY_MILLIS = 3000
+
+        /**
+         * Some older devices needs a small delay between UI widget updates
+         * and a change of the status and navigation bar.
+         */
+        private const val UI_ANIMATION_DELAY = 300
+    }
+
+
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        _binding = null
+//    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+    }
+
 
     override fun onStart() {
         super.onStart()
@@ -445,10 +590,12 @@ class MainActivity : AppCompatActivity() {
 //        } else false
 //    }
 
+    @SuppressLint("MissingPermission")
     private fun isConnected(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val nw      = connectivityManager.activeNetwork ?: return false
+
+            val nw      = connectivityManager.activeNetwork?: return false
             val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
             return when {
                 actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
@@ -516,9 +663,10 @@ class MainActivity : AppCompatActivity() {
                                                                 Common.loggedUser =
                                                                     User(fireBaseUser.uid,
                                                                         fireBaseUser.email!!,
-                                                                        fireBaseUser.displayName!!)
+                                                                        fireBaseUser.displayName!!,
+                                                                    fireBaseUser.photoUrl!!.toString())
                                                                 //Add to database
-                                                                user_information.child(Common.loggedUser!!.uid!!)
+                                                                user_information.child(Common.loggedUser!!.uid)
                                                                     .setValue(Common.loggedUser)
 
 
@@ -536,7 +684,7 @@ class MainActivity : AppCompatActivity() {
                                                         //Save UID to storage to update location from killed mode
                                                         Paper.book()
                                                             .write(Common.USER_UID_SAVE_KEY,
-                                                                Common.loggedUser!!.uid!!)
+                                                                Common.loggedUser!!.uid)
                                                         updateToken(fireBaseUser)
                                                         setupUI()
                                                     }
@@ -552,10 +700,13 @@ class MainActivity : AppCompatActivity() {
                                                                     setupUI()
                 val user = mAuth?.currentUser
 
-                Toast.makeText(this,
-                                                        "Bienvenue $user",
-                                                        Toast.LENGTH_LONG)
-                                                        .show()
+                if (fireBaseUser != null) {
+                    Toast.makeText(applicationContext,
+                        "Bienvenue"+
+                                fireBaseUser.displayName!!,
+                        Toast.LENGTH_LONG)
+                        .show()
+                }
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)

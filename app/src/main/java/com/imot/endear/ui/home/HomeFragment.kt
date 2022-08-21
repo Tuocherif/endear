@@ -1,15 +1,26 @@
 package com.imot.endear.ui.home
 
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.imot.endear.databinding.FragmentHomeBinding
+import com.imot.endear.databinding.FragmentSettingsBinding
+import com.imot.endear.ui.settings.SettingsFragment
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(){
+
+
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -33,10 +44,7 @@ class HomeFragment : Fragment() {
 //            textView.text = it
         }
         return root
-    }
+    }// end onCreateView
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+
 }

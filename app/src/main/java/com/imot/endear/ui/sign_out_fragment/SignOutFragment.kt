@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +27,7 @@ class SignOutFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         val SignOutViewModel =
             ViewModelProvider(this)[SignOutViewModel::class.java]
 
@@ -52,12 +51,13 @@ class SignOutFragment: Fragment() {
 
                 alertDialog.setPositiveButton("Se décnnecter"){_, _->
                     Firebase.auth.signOut()
+                    //delay(2000)
                     Intent(context, MainActivity::class.java).also {
                         startActivity(it)
                     }
 
                     view?.let { it1 ->
-                        Snackbar.make(it1, "Vous avez été déconnecté.", Snackbar.LENGTH_LONG)
+                        Snackbar.make(it1, "Vous avez été déconnecté.\n A bientôt.", Snackbar.LENGTH_LONG)
                             .setAction("Action", null)
                             //.setBackgroundTint()
                             .show()

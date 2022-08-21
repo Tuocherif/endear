@@ -56,7 +56,7 @@
         android:id="@+id/cardView"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:layout_marginStart="5dp"
         app:cardCornerRadius="40dp"
         app:cardElevation="0dp">
@@ -71,16 +71,18 @@
             app:srcCompat="@drawable/ic_account" />
 
 
-
     </androidx.cardview.widget.CardView>
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="55dp"
-        app:srcCompat="@drawable/menu_blue3"
-        android:contentDescription="@string/ImageMenu" />
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/ImageMenu"
+        app:layout_anchor="@+id/cardView"
+        app:srcCompat="@drawable/menu_blue3" />
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

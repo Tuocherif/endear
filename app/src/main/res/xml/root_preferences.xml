@@ -1,7 +1,9 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    app:fragment="@string/settings">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory app:title="@string/Settings_header"
+        app:allowDividerBelow="true">
 
 
 <!--        <RingtonePreference-->
@@ -14,7 +16,8 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/Advanced">
+
+    <PreferenceCategory app:title="@string/Appearance">
 
 
         <ListPreference
@@ -32,6 +35,8 @@
     <PreferenceCategory app:title="@string/Website">
         <PreferenceCategory
             app:summary="Site web du développeur"
+            android:icon="@drawable/ic_web"
+
             >
             <intent
                 android:action="android.intent.action.VIEW"

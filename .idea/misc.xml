@@ -9,28 +9,31 @@
         <entry key="app/src/main/res/drawable/side_nav_bar.xml" value="0.1" />
         <entry key="app/src/main/res/layout-v28/activity_all_people.xml" value="0.2911458333333333" />
         <entry key="app/src/main/res/layout-v28/activity_friend_request.xml" value="0.11614583333333334" />
-        <entry key="app/src/main/res/layout-v28/fragment_findpeople.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-v28/fragment_findpeople.xml" value="0.4" />
         <entry key="app/src/main/res/layout-v28/fragment_friendrequest.xml" value="0.1" />
         <entry key="app/src/main/res/layout-v28/fragment_friends_list.xml" value="0.24382384532760473" />
-        <entry key="app/src/main/res/layout-v28/fragment_friendslist.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-v28/fragment_friendslist.xml" value="0.536" />
         <entry key="app/src/main/res/layout-v28/layout_friend_request.xml" value="0.2911458333333333" />
         <entry key="app/src/main/res/layout/activity_all_people.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/activity_endear.xml" value="0.2" />
         <entry key="app/src/main/res/layout/activity_friend_request.xml" value="0.264" />
         <entry key="app/src/main/res/layout/activity_home.xml" value="0.2955729166666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.27218225419664266" />
         <entry key="app/src/main/res/layout/activity_tracking.xml" value="0.2814814814814815" />
-        <entry key="app/src/main/res/layout/app_bar_home.xml" value="0.8" />
+        <entry key="app/src/main/res/layout/app_bar_home.xml" value="0.19721980886185925" />
         <entry key="app/src/main/res/layout/content_home.xml" value="0.2955729166666667" />
         <entry key="app/src/main/res/layout/dialog_wait1.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_addpeople.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/fragment_findpeople.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/fragment_friendrequest.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_endear.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/fragment_findpeople.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/fragment_friendrequest.xml" value="0.4" />
         <entry key="app/src/main/res/layout/fragment_friends_list.xml" value="0.536" />
-        <entry key="app/src/main/res/layout/fragment_friendslist.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_friendslist.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_sign_out.xml" value="0.176" />
         <entry key="app/src/main/res/layout/fragment_slideshow.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/layout_friend_alert.xml" value="0.536" />
         <entry key="app/src/main/res/layout/layout_friend_request.xml" value="0.4" />
         <entry key="app/src/main/res/layout/layout_user.xml" value="0.536" />
         <entry key="app/src/main/res/layout/nav_header_home.xml" value="0.6" />
