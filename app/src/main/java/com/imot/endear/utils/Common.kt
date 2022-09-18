@@ -16,14 +16,15 @@ object Common {
 
     val fireBaseUser: FirebaseUser? =
         FirebaseAuth.getInstance().currentUser
-    var loggedUser: User? = null
+    //var loggedUser: User? = null
+    lateinit var loggedUser: User
 //        User(fireBaseUser!!.uid,
 //            fireBaseUser.email!!,
 //            fireBaseUser.displayName!!)
     var trackingUser: User? = null
 //    var image : Uri? = null
 
-    val USER_INFORMATION : String = "USER_INFORMATION"
+    val USER_INFORMATION : String = "UserInformation"
     val USER_UID_SAVE_KEY = "SAVE_KEY"
     val TOKENS = "Tokens"
     val ACCEPT_LIST ="acceptList"

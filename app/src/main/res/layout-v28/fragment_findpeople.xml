@@ -27,7 +27,7 @@
         android:background="@color/primary"
         />
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_all_people"
+        android:id="@+id/recycler_find_people"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"

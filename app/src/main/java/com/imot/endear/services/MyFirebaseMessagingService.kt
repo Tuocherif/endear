@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -30,7 +29,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         if (message.data != null){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
                 sendNotificationWithChannel(message)
                 sendAlert(message)
             }else{
@@ -97,7 +96,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             .child(Common.FRIEND_ALERT)
 
         val user = User(data[Common.FROM_UID]!!,data[Common.FROM_EMAIL]!!, data[Common.FROM_NAME]!!,data[Common.FROM_IMAGE]!!)
-        friend_request.child(user.uid).setValue(user)
+        friend_request.child(user.uid!!).setValue(user)
     }
 
 

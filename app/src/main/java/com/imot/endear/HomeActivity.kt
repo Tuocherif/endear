@@ -22,8 +22,10 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.biometric.BiometricPrompt
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
@@ -45,11 +47,9 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.imot.endear.databinding.ActivityHomeBinding
+import com.imot.endear.dataclasses.UserData
 import com.imot.endear.model.User
 import com.imot.endear.model.MyResponse
 import com.imot.endear.model.Request
@@ -68,6 +68,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import pl.droidsonroids.gif.GifImageView
 
+/*This activity gives the location on map of all the users whose invitation the current user has accepted and who have accepted his.*/
 
 class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
     LocationListener,
@@ -84,14 +85,17 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
     private lateinit var  drawerLayout: DrawerLayout
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityHomeBinding
+    private lateinit var binding: com.imot.endear.databinding.ActivityHomeBinding
     private lateinit var hView: View
     private lateinit var user_email: TextView
     private lateinit var user_image: ImageView
     private lateinit var imageMenu: ImageView
     private lateinit var navigationView: NavigationView
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo : BiometricPrompt.PromptInfo
     val mode = AppCompatDelegate.getDefaultNightMode()
     lateinit var sharedPreferences: SharedPreferences
+    private lateinit var dbRef : DatabaseReference
 
 
 
@@ -143,16 +147,16 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
     val model =
         fireBaseUser?.let {
             User(it.uid,
-                fireBaseUser.email!!,
-                fireBaseUser.displayName!!,
-                fireBaseUser.photoUrl!!.toString())
+                it.email!!,
+                it.displayName!!,
+                it.photoUrl.toString())
         }
 
     val list = fireBaseUser?.let {
         User(it.uid,
-            fireBaseUser.email!!,
-            fireBaseUser.displayName!!,
-            fireBaseUser.photoUrl!!.toString()).acceptList
+            it.email!!,
+            it.displayName!!,
+            it.photoUrl.toString()).acceptList
     }
 
 
@@ -201,7 +205,113 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
 
             sharedPreferences = this.getSharedPreferences("custom_theme", Context.MODE_PRIVATE)
 
-
+//            val biometricManager = BiometricManager.from(this)
+//
+//            when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)){
+//                BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->{
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Le lecteur d'empreinte digitale n'a pas fonctionné correctement.",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    //return
+//                }
+//
+//                BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE ->{
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Votre appareil ne dispose pas de lecteur d'empreinte digitale",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//
+//                    //return
+//                }
+////            BiometricManager.BIOMETRIC_SUCCESS ->
+////                return
+//                BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->{
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Aucune empreinte digitale trouvée",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    //return
+//                }
+////            BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED ->
+////                return
+//
+//                BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Une erreur est survenue !!!",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//                BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Une erreur est survenue !!!",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//                BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Une erreur est survenue !!!",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//                BiometricManager.BIOMETRIC_SUCCESS -> {
+////                    Toast.makeText(
+////                        applicationContext,
+////                        "Bienvenue",
+////                        Toast.LENGTH_SHORT
+////                    ).show()
+//                }
+//            }
+//            val executor = ContextCompat.getMainExecutor(this)
+//
+//            biometricPrompt = BiometricPrompt(this@HomeActivity, executor, object : BiometricPrompt.AuthenticationCallback(){
+//                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+//                    super.onAuthenticationError(errorCode, errString)
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Paramètres biométriques non vérifiés",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    finish()
+//                }
+//
+//                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+//                    super.onAuthenticationSucceeded(result)
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Accès autorisé",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    drawerLayout.visibility = View.VISIBLE
+//                }
+//
+//                override fun onAuthenticationFailed() {
+//                    super.onAuthenticationFailed()
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Accès refusé",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            })
+//
+//            promptInfo = BiometricPrompt.PromptInfo.Builder().setTitle("IProtect")
+//                .setDescription("Dévérrouiller l'application avec votre empreinte digitale.").setAllowedAuthenticators(
+//                    BiometricManager.Authenticators.BIOMETRIC_STRONG)
+//                .setNegativeButtonText("Annuler").apply {
+////                moveTaskToBack(true)
+////                android.os.Process.killProcess(android.os.Process.myPid())
+////                exitProcess(1)
+//                    finish()
+//            }.build()
+//
+//            biometricPrompt.authenticate(promptInfo)
 
             service = this.getSystemService(LOCATION_SERVICE) as LocationManager
         enabled = service!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -327,6 +437,20 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
                     .into(user_image)
                 Picasso.get().load(account.photoUrl)
                     .into(imageMenu)
+
+//                val name = account.displayName
+//                val image = account.photoUrl.toString()
+//
+//                dbRef = FirebaseDatabase.getInstance().getReference("Users")
+//
+//                val User = UserData(name,image)
+//
+//                dbRef.child(name!!).setValue(User).addOnSuccessListener {
+//                    Toast.makeText(this, "Enregistrement réussi",Toast.LENGTH_SHORT).show()
+//                }.addOnFailureListener{
+//                    Toast.makeText(this, "Echec de l'Enregistrement",Toast.LENGTH_SHORT).show()
+//                }
+
             }
 
 
@@ -336,6 +460,15 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
             }
 
     } // end onCreate
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START)
+        }else{
+            super.onBackPressed()
+        }
+    }
 
     private fun sendAlert(model : User?, List: HashMap<String, User>?)  {
             //Get token to send friend request
@@ -353,15 +486,16 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
                             //Create request
                             val request = Request()
                             val dataSend = HashMap<String,String>()
-                            dataSend[Common.FROM_UID] = Common.loggedUser!!.uid //sender's uid
-                            dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email //sender's email
-                            dataSend[Common.FROM_NAME] = Common.loggedUser!!.name //sender's name
-                            dataSend[Common.FROM_IMAGE] = Common.loggedUser!!.image //sender's image
+                            dataSend[Common.FROM_UID] = Common.loggedUser!!.uid.toString() //sender's uid
+                            dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email.toString() //sender's email
+                            dataSend[Common.FROM_NAME] = Common.loggedUser!!.name.toString() //sender's name
+                            dataSend[Common.FROM_IMAGE.toString()] =
+                                Common.loggedUser!!.image.toString() //sender's image
                             dataSend[Common.PUBLIC_LOCTION] = Common.loggedUser!!.location!!.toString() //sender's Location
-                            dataSend[Common.TO_UID] = model.uid //receiver's uid
-                            dataSend[Common.TO_EMAIL] = model.email //receiver's email
-                            dataSend[Common.TO_NAME] = model.name //receiver's name
-                            dataSend[Common.TO_IMAGE] = model.image //receiver's image
+                            dataSend[Common.TO_UID] = model.uid.toString() //receiver's uid
+                            dataSend[Common.TO_EMAIL] = model.email.toString() //receiver's email
+                            dataSend[Common.TO_NAME] = model.name.toString() //receiver's name
+                            dataSend[Common.TO_IMAGE] = model.image.toString() //receiver's image
 
 
                             //set request
@@ -411,15 +545,17 @@ class HomeActivity : AppCompatActivity() , OnMapReadyCallback, GoogleApiClient.C
                                 //Create request
                                 val request = Request()
                                 val dataSend = HashMap<String,String>()
-                                dataSend[Common.FROM_UID] = Common.loggedUser!!.uid //sender's uid
-                                dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email //sender's email
-                                dataSend[Common.FROM_NAME] = Common.loggedUser!!.name //sender's name
-                                dataSend[Common.FROM_IMAGE] = Common.loggedUser!!.image //sender's image
+                                dataSend[Common.FROM_UID] = Common.loggedUser!!.uid.toString() //sender's uid
+                                dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email.toString() //sender's email
+                                dataSend[Common.FROM_NAME] = Common.loggedUser!!.name.toString() //sender's name
+                                dataSend[Common.FROM_IMAGE.toString()] =
+                                    Common.loggedUser!!.image.toString() //sender's image
                                 dataSend[Common.PUBLIC_LOCTION] = Common.loggedUser!!.location!!.toString() //sender's location
-                                dataSend[Common.TO_UID] = model.uid //receiver's uid
-                                dataSend[Common.TO_EMAIL] = model.email //receiver's email
-                                dataSend[Common.TO_NAME] = model.name //receiver's name
-                                dataSend[Common.TO_IMAGE] = model.image //receiver's image
+                                dataSend[Common.TO_UID] = model.uid.toString() //receiver's uid
+                                dataSend[Common.TO_EMAIL] = model.email.toString() //receiver's email
+                                dataSend[Common.TO_NAME] = model.name.toString() //receiver's name
+                                dataSend[Common.TO_IMAGE] =
+                                    model.image.toString() //receiver's image
 
 
                                 //set request

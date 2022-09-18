@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.imot.endear.R
 import com.imot.endear.databinding.FragmentEndearBinding
 import kotlin.properties.Delegates
+
+/*Bonus game*/
 
 /**
  * An example full-screen fragment that shows and hides the system UI (i.e.
@@ -31,8 +34,9 @@ class EndearFragment : Fragment(), View.OnClickListener {
     private var rountCount by Delegates.notNull<Int>()
 
     /*
-    * p1 => 0
-    * p2 => 1
+    Tracking buttons
+    * player 1 => 0
+    * player 2 => 1
     * empty => 2
     * */
 
@@ -58,6 +62,9 @@ class EndearFragment : Fragment(), View.OnClickListener {
     private lateinit var playerStatus : TextView
     private lateinit var btn_ResetGame : Button
     private val buttons = arrayOfNulls<Button>(9)
+
+    private lateinit var endearLayout : ScrollView
+
 
     @Suppress("InlinedApi")
     private val hidePart2Runnable = Runnable {
@@ -122,7 +129,7 @@ class EndearFragment : Fragment(), View.OnClickListener {
 //            for (i in 0 until buttons.lastIndex) {
 //                val buttonID = "btn_$i"
 //            }
-
+            endearLayout = view?.findViewById(R.id.endearLayout) as ScrollView
             playerOneScore = view?.findViewById(R.id.tv_playerOneScore) as TextView
             playerTwoScore = view?.findViewById(R.id.tv_playerTwoScore) as TextView
             playerStatus = view?.findViewById(R.id.tv_playerStatus) as TextView
@@ -265,27 +272,41 @@ class EndearFragment : Fragment(), View.OnClickListener {
             Integer.parseInt(it)}//2
 
             if(activePlayer){
-                (v as Button).text = "X"
-                v.setTextColor(Color.parseColor("#FFC34A"))
-                gameState[gameStatePointer] = 0
+
+                if(gameState[gameStatePointer] == 0 || gameState[gameStatePointer] == 1){
+                    Toast.makeText(v.context,"Interdit !!!! Cette position est déjà occupée.",Toast.LENGTH_SHORT).show()
+                    return
+                }else{
+                    (v as Button).text = "X"
+                    v.setTextColor(Color.parseColor("#70FFEA"))
+                    gameState[gameStatePointer] = 0
+                }
+
             }else{
-                (v as Button).text = "O"
-                v.setTextColor(Color.parseColor("#70FFEA"))
-                gameState[gameStatePointer] = 1
+                if(gameState[gameStatePointer] == 0 || gameState[gameStatePointer] == 1){
+                    Toast.makeText(v.context,"Interdit !!!! Cette position est déjà occupée.",Toast.LENGTH_SHORT).show()
+                    return
+                }else{
+                    (v as Button).text = "O"
+                    v.setTextColor(Color.parseColor("#FFC34A"))
+                    gameState[gameStatePointer] = 1
+                }
             }
                     rountCount++
 
         if(checkWinner()){
             if(activePlayer){
-                playerOneScoreCount++
-                updatePlayerScore()
-                Toast.makeText(v.context,"Joueur 1 a gagné cette partie !",Toast.LENGTH_SHORT).show()
-                playAgain()
+                if(gameState[gameStatePointer] == 0){
+                    playerOneScoreCount++
+                    updatePlayerScore()
+                    Toast.makeText(v.context,"Joueur 1 a gagné cette partie !",Toast.LENGTH_SHORT).show()
+                    playAgain()
+                }
             }else{
-                playerTwoScoreCount++
-                updatePlayerScore()
-                Toast.makeText(context,"Joueur 2 a gagné cette partie !",Toast.LENGTH_SHORT).show()
-                playAgain()
+                    playerTwoScoreCount++
+                    updatePlayerScore()
+                    Toast.makeText(context,"Joueur 2 a gagné cette partie !",Toast.LENGTH_SHORT).show()
+                    playAgain()
             }
         }else if(rountCount == 9){
             playAgain()

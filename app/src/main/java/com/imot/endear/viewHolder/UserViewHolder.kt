@@ -1,6 +1,7 @@
 package com.imot.endear.viewHolder
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.imot.endear.R
@@ -10,7 +11,8 @@ class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),View.On
 
     lateinit var InterfaceRecyclerItemClickListener : InterfaceRecyclerItemClickListener
 
-    var tv_user_name : TextView
+    var tv_user_name_u : TextView
+    var tv_user_image_u: ImageView
 
 
      fun setClick(
@@ -19,24 +21,21 @@ class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),View.On
     }
 
     init {
-        tv_user_name = itemView.findViewById(R.id.tv_user_name) as TextView
+        tv_user_name_u = itemView.findViewById(R.id.tv_user_name_u) as TextView
+        tv_user_image_u = itemView.findViewById(R.id.tv_user_image_u) as ImageView
 
-        itemView.setOnClickListener({this})
+        itemView.setOnClickListener(this)
     }
-     fun UserViewHolder ( itemView: View){
-         tv_user_name = itemView.findViewById(R.id.tv_user_name)
+    fun UserViewHolder ( itemView: View){
+        tv_user_name_u = itemView.findViewById(R.id.tv_user_name_u)
+        tv_user_image_u = itemView.findViewById(R.id.tv_user_image_u)
 
-        itemView.setOnClickListener(View.OnClickListener {  this})
+        itemView.setOnClickListener(this)
     }
 
     override fun onClick (view: View?){
-
         InterfaceRecyclerItemClickListener.onItemClickListener(view!!,absoluteAdapterPosition)
     }
-
-
-
-
 
 }
 

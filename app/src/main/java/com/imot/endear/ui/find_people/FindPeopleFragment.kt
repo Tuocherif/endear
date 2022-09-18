@@ -18,22 +18,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.imot.endear.R
+import com.imot.endear.adapters.FindPeopleAdapter
+import com.imot.endear.dataclasses.UserData
 import com.imot.endear.viewHolder.UserViewHolder
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.interfaces.InterfaceRecyclerItemClickListener
 import com.imot.endear.model.MyResponse
 import com.imot.endear.model.Request
 import com.imot.endear.model.User
+import com.imot.endear.remote.IFCMService
 import com.imot.endear.utils.Common
 import com.mancj.materialsearchbar.MaterialSearchBar
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.lang.reflect.Array
+
+/*This activity presents all the people using the app and allows you
+to send them a friend request to have the location of each other in real time.*/
 
 class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
@@ -43,11 +47,14 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    var searchAdapter: FirebaseRecyclerAdapter<User,UserViewHolder>? = null
+    private var searchAdapter: FirebaseRecyclerAdapter<User,UserViewHolder>? = null
     var adapter : FirebaseRecyclerAdapter<User,UserViewHolder>? = null
 
-    lateinit var recycler_all_user : RecyclerView
-    lateinit var firebaseLoadDone : IfirebaseLoadDone
+    lateinit var recycler_find_people : RecyclerView
+    private lateinit var firebaseLoadDone : IfirebaseLoadDone
+    private lateinit var iFCMService : IFCMService
+    private lateinit var dbRef : DatabaseReference
+    private lateinit var userArrayList : ArrayList<User>
     lateinit var expandable_search_bar : MaterialSearchBar
 
 
@@ -69,12 +76,15 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
         //val textView: TextView = binding.tvFindPeople
         FindPeopleViewModel.text.observe(viewLifecycleOwner) {
-            //textView.text = it
+            //Init View
 
             //iFCMService = Common.fcmService
+            userArrayList = arrayListOf()
+            getUserData()
 
-            recycler_all_user = binding.recyclerAllPeople
             expandable_search_bar = binding.expandableSearchBar
+            //recycler_find_people = view?.findViewById(R.id.recycler_find_people)  as RecyclerView
+            //expandable_search_bar = view?.findViewById(R.id.expandable_search_bar)  as MaterialSearchBar
             expandable_search_bar.setCardViewElevation(10)
             expandable_search_bar.addTextChangeListener(object : TextWatcher {
 
@@ -82,14 +92,14 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val suggest: List<String> = ArrayList<String>()
+                    val suggest = ArrayList<String>()
 
                     for (search in suggestList){
                         if (search.lowercase().contentEquals(expandable_search_bar.text.lowercase())){
-                            suggest.plus(search)
+                            suggest.add(search)
                         }
-                        expandable_search_bar.lastSuggestions = suggest
                     }
+                    expandable_search_bar.lastSuggestions = suggest
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -102,44 +112,66 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                     if (!enabled){
                         //Close search == return default
                         if (adapter != null){
-                            recycler_all_user.adapter = adapter
+                            recycler_find_people.adapter = adapter
                         }
                     }
                 }
 
                 override fun onSearchConfirmed(text: CharSequence?) {
                     startSearch(text.toString())
-
                 }
 
                 override fun onButtonClicked(buttonCode: Int) {
-
                 }
 
             })
 
-            recycler_all_user.setHasFixedSize(true)
+            recycler_find_people = binding.recyclerFindPeople
+            recycler_find_people.setHasFixedSize(true)
             val layoutManager = LinearLayoutManager(context)
-            recycler_all_user.layoutManager = layoutManager
-            recycler_all_user.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
+            recycler_find_people.layoutManager = layoutManager
+            recycler_find_people.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
 
             firebaseLoadDone = this
 
             loadUserList()
             loadSearchData()
+            //startSearch(readLine())
         }
         return root
     }//end onCreate
+
+    private fun getUserData() {
+        dbRef = FirebaseDatabase.getInstance().getReference("Users")
+
+        dbRef.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    for (userSnapshot in snapshot.children){
+
+                        val User = userSnapshot.getValue(User::class.java)
+                        userArrayList.add(User!!)
+
+                    }
+                    recycler_find_people.adapter = FindPeopleAdapter(userArrayList)
+                }
+                           }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+
+        })
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    private fun startSearch(search_string : String){
+    private fun startSearch(text_search : String?){
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .orderByChild("name")
-            .startAt(search_string)
+            .startAt(text_search)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
             .setQuery(query, User::class.java)
@@ -153,11 +185,11 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                if (model.name.equals(Common.loggedUser!!.name)){
-                    holder.tv_user_name.text = StringBuilder(model.name).append(" (me)")
-                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
+                if (model.name == Common.loggedUser.name){
+                    holder.tv_user_name_u.text = StringBuilder(model.name!!).append(" (moi)")
+                    holder.tv_user_name_u.setTypeface(holder.tv_user_name_u.typeface, Typeface.ITALIC)
                 } else{
-                    holder.tv_user_name.text = StringBuilder(model.name)
+                    holder.tv_user_name_u.text = StringBuilder(model.name!!)
                 }
 
                 //Event
@@ -173,13 +205,13 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
         }
 
         searchAdapter!!.startListening()
-        recycler_all_user.adapter = searchAdapter
+        recycler_find_people.adapter = searchAdapter
 
 
     }
 
-    fun loadUserList(){
-        val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
+    private fun loadUserList(){
+        val query = FirebaseDatabase.getInstance().reference.child(Common.USER_INFORMATION)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
             .setQuery(query, User::class.java)
@@ -193,11 +225,16 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                if (model.name == Common.loggedUser!!.name){
-                    holder.tv_user_name.text = StringBuilder(model.name).append(" (moi)")
-                    holder.tv_user_name.setTypeface(holder.tv_user_name.typeface, Typeface.ITALIC)
+                if (model.name == Common.loggedUser.name){
+                    holder.tv_user_name_u.text = StringBuilder(model.name!!).append(" (moi)")
+                    holder.tv_user_name_u.setTypeface(holder.tv_user_name_u.typeface, Typeface.ITALIC)
+
+                    val bitmap = Array.getInt(model.image!!, 0)
+                    holder.tv_user_image_u.setImageResource(bitmap)
                 } else{
-                    holder.tv_user_name.text = StringBuilder(model.name)
+                    holder.tv_user_name_u.text = StringBuilder(model.name!!)
+                    val bitmap = Array.getInt(model.image!!, 0)
+                    holder.tv_user_image_u.setImageResource(bitmap)
                 }
 
                 //Event
@@ -211,7 +248,29 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
         }
 
         adapter!!.startListening()
-        recycler_all_user.adapter = adapter
+        recycler_find_people.adapter = adapter
+    }
+
+    private fun loadSearchData()  {
+
+        val lstUserName = ArrayList<String>()
+        val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
+
+        userList.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (userSnapShot in snapshot.children){
+                    val user = userSnapShot.getValue(User::class.java)
+                    lstUserName.add(user!!.name!!)
+                }
+                firebaseLoadDone.onFirebaseLoadUserNameDone(lstUserName)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                firebaseLoadDone.onFirebaseLoadUserNameFailed(error.message)
+            }
+        })
+
+        expandable_search_bar.lastSuggestions = lstUserName
     }
 
     private fun showDialogRequest(model: User) {
@@ -225,7 +284,7 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
             alertDialog.setPositiveButton("Envoyer"){_, _->
                 val acceptList = FirebaseDatabase.getInstance()
                     .getReference(Common.USER_INFORMATION)
-                    .child(Common.loggedUser!!.uid)
+                    .child(Common.loggedUser.uid!!)
                     .child(Common.ACCEPT_LIST)
 
                 //Chek from actual user friend list to make sure is not friend before
@@ -268,17 +327,17 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
                         //Create request
                         val request = Request()
                         val dataSend = HashMap<String,String>()
-                        dataSend[Common.FROM_UID] = Common.loggedUser!!.uid //sender's uid
-                        dataSend[Common.FROM_EMAIL] = Common.loggedUser!!.email //sender's email
-                        dataSend[Common.FROM_NAME] = Common.loggedUser!!.name //sender's name
-                        dataSend[Common.FROM_IMAGE] = Common.loggedUser!!.image //sender's image
-                        dataSend[Common.TO_UID] = model.uid //receiver's uid
-                        dataSend[Common.TO_EMAIL] = model.email //receiver's email
-                        dataSend[Common.TO_NAME] = model.name //receiver's name
-                        dataSend[Common.TO_IMAGE] = model.image //receiver's image
+                        dataSend[Common.FROM_UID] = Common.loggedUser.uid!! //sender's uid
+                        dataSend[Common.FROM_EMAIL] = Common.loggedUser.email!! //sender's email
+                        dataSend[Common.FROM_NAME] = Common.loggedUser.name!!  //sender's name
+                        dataSend[Common.FROM_IMAGE] = Common.loggedUser.image.toString() //sender's image
+                        dataSend[Common.TO_UID] = model.uid!! //receiver's uid
+                        dataSend[Common.TO_EMAIL] = model.email!! //receiver's email
+                        dataSend[Common.TO_NAME] = model.name!! //receiver's name
+                        dataSend[Common.TO_IMAGE] = model.image.toString() //receiver's image
 
                         //set request
-                        request.to = snapshot.child(model.uid).getValue(String::class.java)!!
+                        request.to = snapshot.child(model.uid!!).getValue(String::class.java)!!
                         request.data = dataSend
 
                         //send
@@ -307,44 +366,26 @@ class FindPeopleFragment : Fragment(), IfirebaseLoadDone {
 
     }
 
-    fun loadSearchData(){
-
-        val lstUserName = ArrayList<String>()
-        val userList = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-
-        userList.addListenerForSingleValueEvent(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (userSnapShot in snapshot.children){
-                    val user = userSnapShot.getValue(User::class.java)
-                    lstUserName.add(user?.name!!)
-                }
-                onFirebaseLoadUserNameDone(lstUserName)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                onFirebaseLoadUserNameFailed(error.message)
-            }
-
-        })
-    }
 
     override fun onStop() {
-        if (adapter != null){
-            adapter!!.stopListening()
-        }
-        if (searchAdapter != null){
-            searchAdapter!!.stopListening()
-        }
+        adapter?.stopListening()
+        searchAdapter?.stopListening()
 
-        compositeDisposable.clear()
+        //compositeDisposable.clear()
         super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adapter?.startListening()
+        searchAdapter?.startListening()
     }
     override fun onFirebaseLoadUserNameDone(lstName: List<String>) {
         expandable_search_bar.lastSuggestions = lstName
     }
 
     override fun onFirebaseLoadUserNameFailed(message: String) {
-        Toast.makeText(context, message,Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "erreur de chargement des noms",Toast.LENGTH_LONG).show()
     }
 
 }

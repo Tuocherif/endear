@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -31,17 +32,27 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.AuthUI.IdpConfig.EmailBuilder
+import com.firebase.ui.auth.AuthUI.IdpConfig.GoogleBuilder
+import com.firebase.ui.auth.IdpResponse
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.CurrentLocationRequest
+import com.google.android.gms.location.LocationListener
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
+import com.imot.endear.dataclasses.UserData
 import com.imot.endear.model.User
 import com.imot.endear.utils.Common
 import com.karumi.dexter.Dexter
@@ -50,11 +61,14 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.squareup.picasso.Picasso
 import io.paperdb.Paper
 
 
+/*Activity allowing login via google Auth. Firebase realtime DB should log the user's email, name, photo, and real-time location.*/
+
 class MainActivity : AppCompatActivity(),
-    SharedPreferences.OnSharedPreferenceChangeListener  {
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
 
     lateinit var user_information : DatabaseReference
@@ -71,6 +85,7 @@ class MainActivity : AppCompatActivity(),
     var mGoogleSignInClient: GoogleSignInClient? = null
     private var mAuth: FirebaseAuth? = null
     var dialog: Dialog? = null
+
 
 //        private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //
@@ -92,28 +107,15 @@ class MainActivity : AppCompatActivity(),
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
                     View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        this?.window?.decorView?.systemUiVisibility = flags
+        this.window?.decorView?.systemUiVisibility = flags
         (this as? AppCompatActivity)?.supportActionBar?.hide()
     }
     private val showPart2Runnable = Runnable {
         // Delayed display of UI elements
-        fullscreenContentControls?.visibility = View.VISIBLE
+        fullscreenContentControls?.visibility = VISIBLE
     }
     private var visible_l: Boolean = false
     private val hideRunnable = Runnable { hide() }
-
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private val delayHideTouchListener = View.OnTouchListener { _, _ ->
-        if (AUTO_HIDE) {
-
-            delayedHide(AUTO_HIDE_DELAY_MILLIS)
-        }
-        false
-    }
 
     private var dummyButton: Button? = null
     private var fullscreenContent: View? = null
@@ -122,15 +124,16 @@ class MainActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 //        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
         mAuth = FirebaseAuth.getInstance()
 
         // Biometric connection
         mainLayout = findViewById(R.id.main_layout)
-        var biometricManager = BiometricManager.from(this)
+        val biometricManager = BiometricManager.from(this)
 
-        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)){
+        when (biometricManager.canAuthenticate(BIOMETRIC_STRONG)){
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->{
                 Toast.makeText(
                     applicationContext,
@@ -162,6 +165,34 @@ class MainActivity : AppCompatActivity(),
 //            BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED ->
 //                return
 
+            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
+                Toast.makeText(
+                    applicationContext,
+                    "Une erreur est survenue !!!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
+                Toast.makeText(
+                    applicationContext,
+                    "Une erreur est survenue !!!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
+                Toast.makeText(
+                    applicationContext,
+                    "Une erreur est survenue !!!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            BiometricManager.BIOMETRIC_SUCCESS -> {
+//                Toast.makeText(
+//                    applicationContext,
+//                    "Bienvenue",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+            }
         }
         val executor = ContextCompat.getMainExecutor(this)
 
@@ -204,6 +235,7 @@ class MainActivity : AppCompatActivity(),
         //  init DB
         Paper.init(this)
 
+
 //        oneTapClient = Identity.getSignInClient(this)
 //        signUpRequest = BeginSignInRequest.builder()
 //            .setGoogleIdTokenRequestOptions(
@@ -218,7 +250,13 @@ class MainActivity : AppCompatActivity(),
 
 
         //Init Firebase
-        user_information = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
+        user_information = FirebaseDatabase.getInstance().getReference("Users")
+
+        // Init provider
+        providers = listOf(
+            EmailBuilder().build(),
+            GoogleBuilder().build()
+        )
 
         //Request permission location
         Dexter.withContext(this)
@@ -403,11 +441,41 @@ class MainActivity : AppCompatActivity(),
 //            }
 //        }
 //
-        signInbtn.setOnClickListener {view ->
+        signInbtn.setOnClickListener {
 
             if(isConnected(this)){
                 signIn()
                 //Snackbar.make(view, "Bienvenue ", Snackbar.LENGTH_LONG).show()
+
+
+//                var location = LocationListener.
+//
+//
+//                val dbRef = FirebaseDatabase.getInstance().getReference("Users")
+//                val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
+//                val currentUser = mAuth?.currentUser
+//
+//                val name = account?.displayName
+//                val image = account?.photoUrl.toString()
+//                val uid = account?.id
+//                val email = account?.email
+//                //val location = account?.location
+//
+//
+////        val name = currentUser?.displayName
+////        val image = currentUser?.photoUrl.toString()
+////        val uid = currentUser?.uid
+////        val email = currentUser?.email
+//
+//
+//                val User = UserData(name,image,uid,email, location)
+//
+//                dbRef.child(name!!).setValue(User).addOnSuccessListener {
+//                    Toast.makeText(this, "Enregistrement réussi",Toast.LENGTH_SHORT).show()
+//                }.addOnFailureListener{
+//                    Toast.makeText(this, "Echec de l'Enregistrement",Toast.LENGTH_SHORT).show()
+//                }
+
             }else{
                 showCustomDialog()
             }
@@ -417,7 +485,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        this?.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        this.window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
@@ -427,10 +495,10 @@ class MainActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
-        this?.window?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        this.window?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         // Clear the systemUiVisibility flag
-        this?.window?.decorView?.systemUiVisibility = 0
+        this.window?.decorView?.systemUiVisibility = 0
         show()
     }
 
@@ -593,7 +661,7 @@ class MainActivity : AppCompatActivity(),
     @SuppressLint("MissingPermission")
     private fun isConnected(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2) {
 
             val nw      = connectivityManager.activeNetwork?: return false
             val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
@@ -624,6 +692,35 @@ class MainActivity : AppCompatActivity(),
 
         //activityResultLauncher.launch(intent)
 
+        //        var mLastLocation = location
+//
+//        //Place current location marker
+//        val latLng = LatLng(location.latitude, location.longitude)
+//
+//        val dbRef = FirebaseDatabase.getInstance().getReference("Users")
+//        val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
+//        val currentUser = mAuth?.currentUser
+//
+//                val name = account?.displayName
+//                val image = account?.photoUrl.toString()
+//                val uid = account?.id
+//                val email = account?.email
+//                //val location = account?.location
+//
+//
+////        val name = currentUser?.displayName
+////        val image = currentUser?.photoUrl.toString()
+////        val uid = currentUser?.uid
+////        val email = currentUser?.email
+//
+//
+//        val User = UserData(name,image,uid,email,mLastLocation)
+//
+//        dbRef.child(name!!).setValue(User).addOnSuccessListener {
+//            Toast.makeText(this, "Enregistrement réussi",Toast.LENGTH_SHORT).show()
+//        }.addOnFailureListener{
+//            Toast.makeText(this, "Echec de l'Enregistrement",Toast.LENGTH_SHORT).show()
+//        }
     }
 
 
@@ -636,6 +733,7 @@ class MainActivity : AppCompatActivity(),
         if (requestCode == RC_SIGN_IN) {
             dialog?.show()
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val response : IdpResponse? = IdpResponse.fromResultIntent(data)
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 val account = task.getResult(ApiException::class.java)
@@ -647,15 +745,15 @@ class MainActivity : AppCompatActivity(),
                                         val fireBaseUser: FirebaseUser? =
                                             FirebaseAuth.getInstance().currentUser
                                         //Check if user exists on DB
-                                        user_information.orderByValue()
-                                            .equalTo(fireBaseUser?.uid)
+                                        user_information.orderByKey()
+                                            .equalTo(fireBaseUser?.displayName.toString())
                                             .addListenerForSingleValueEvent(
                                                 object : ValueEventListener {
                                                     override fun onDataChange(snapshot: DataSnapshot) {
                                                         // Removing the event listener will also prevent any further calls into onDataChange
                                                         //If user doesn't exists
                                                         if (snapshot.value == null) {
-//                                                if (fireBaseUser != null) {
+                                                if (fireBaseUser != null) {
                                                             if (!snapshot.child(fireBaseUser!!.uid)
                                                                     .exists()
                                                             )//If key uid doesn't exists
@@ -664,12 +762,10 @@ class MainActivity : AppCompatActivity(),
                                                                     User(fireBaseUser.uid,
                                                                         fireBaseUser.email!!,
                                                                         fireBaseUser.displayName!!,
-                                                                    fireBaseUser.photoUrl!!.toString())
+                                                                    fireBaseUser.photoUrl.toString())
                                                                 //Add to database
-                                                                user_information.child(Common.loggedUser!!.uid)
+                                                                user_information.child(Common.loggedUser.uid!!)
                                                                     .setValue(Common.loggedUser)
-
-
                                                             }
                                                         } else// if user is available
                                                         {
@@ -678,15 +774,20 @@ class MainActivity : AppCompatActivity(),
                                                                     snapshot.child(fireBaseUser.uid)
                                                                         .getValue(User::class.java)!!
                                                             }
-
                                                         }
+                                                            Common.loggedUser =
+                                                                User(Common.fireBaseUser!!.uid,
+                                                                    Common.fireBaseUser.email!!,
+                                                                    Common.fireBaseUser.displayName!!,
+                                                                    Common.fireBaseUser.photoUrl.toString())
 
-                                                        //Save UID to storage to update location from killed mode
-                                                        Paper.book()
+                                                            //Save UID to storage to update location from killed mode
+                                                            Paper.book()
                                                             .write(Common.USER_UID_SAVE_KEY,
-                                                                Common.loggedUser!!.uid)
-                                                        updateToken(fireBaseUser)
-                                                        setupUI()
+                                                                Common.loggedUser.uid!!)
+                                                            updateToken(fireBaseUser)
+                                                            setupUI()
+                                                    }
                                                     }
 
                                                     override fun onCancelled(error: DatabaseError) {
@@ -750,19 +851,20 @@ class MainActivity : AppCompatActivity(),
             startActivity(it)
         }
         finish()
-
     }
 
 
     private fun updateToken(fireBaseUser: FirebaseUser?) {
-        val tokens = FirebaseDatabase.getInstance()
+        val tokens = FirebaseDatabase.getInstance() // Use for send and receive notifications
             .getReference(Common.TOKENS)
 
-        //Get Tokens
+        //Get Token
         FirebaseMessaging.getInstance().token.addOnSuccessListener(this
         ) { instanceIdResult ->
             if (fireBaseUser != null) {
                 tokens.child(fireBaseUser.uid)
+                        ///////////////////////////////////////////////
+                    .setValue(instanceIdResult)
                 val newToken = instanceIdResult.toString()
                 Log.d("newToken", newToken)
             }
@@ -774,8 +876,11 @@ class MainActivity : AppCompatActivity(),
                 Toast.LENGTH_LONG
             ).show()
         }
-
     }
+
+//    override fun onLocationChanged(location: Location)  {
+//}
+
 }
 
 

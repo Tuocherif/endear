@@ -37,13 +37,16 @@ import com.imot.endear.databinding.FragmentSettingsBinding
 import com.imot.endear.viewHolder.FriendRequestViewHolder
 import com.imot.endear.interfaces.IfirebaseLoadDone
 import com.imot.endear.model.User
-import com.imot.endear.ui.add_people.AddPeopleFragment
 import com.imot.endear.ui.find_people.FindPeopleFragment
 import com.imot.endear.ui.friends_list.FriendsListFragment
 import com.imot.endear.ui.sign_out_fragment.SignOutFragment
 import com.imot.endear.utils.Common
 import com.mancj.materialsearchbar.MaterialSearchBar
 import java.lang.reflect.Array.getInt
+
+
+/*This activity presents all notifications from people using the app who have sent a friend request
+(for people not yet on the friend list) or an alert to the user (for people on the friend list).*/
 
 class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
@@ -174,7 +177,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
         intent = Intent(getApplicationContext(), FindPeopleFragment::class.java)
         startActivity(intent)
 
-        intent = Intent(getApplicationContext(), AddPeopleFragment::class.java)
+        intent = Intent(getApplicationContext(), FriendRequestFragment::class.java)
         startActivity(intent)
 
         intent = Intent(getApplicationContext(), SignOutFragment::class.java)
@@ -210,7 +213,7 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
 
     private fun startSearch(search_string: String) {
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid)
+            .child(Common.loggedUser.uid!!)
             .child(Common.FRIEND_REQUEST)
             .child(Common.FRIEND_ALERT)
             .orderByChild("name")
@@ -416,29 +419,29 @@ class FriendRequestFragment : Fragment(), IfirebaseLoadDone {
     private fun addUserToFriendContact(model: User) {
         val acceptList = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(model.uid)
+            .child(model.uid!!)
             .child(Common.ACCEPT_LIST)
 
-        acceptList.child(Common.loggedUser!!.uid).setValue(Common.loggedUser)
+        acceptList.child(Common.loggedUser.uid!!).setValue(Common.loggedUser)
 
     }
 
     private fun addToAcceptList(model: User) {
         val acceptList = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid)
+            .child(Common.loggedUser.uid!!)
             .child(Common.ACCEPT_LIST)
 
-        acceptList.child(model.uid).setValue(model)
+        acceptList.child(model.uid!!).setValue(model)
     }
 
     private fun deleteFriendRequest(model: User, isShowMessage: Boolean) {
         val friendRequest = FirebaseDatabase.getInstance()
             .getReference(Common.USER_INFORMATION)
-            .child(Common.loggedUser!!.uid)
+            .child(Common.loggedUser.uid!!)
             .child(Common.FRIEND_REQUEST)
 
-        friendRequest.child(model.uid).removeValue()
+        friendRequest.child(model.uid!!).removeValue()
             .addOnSuccessListener {
                 if (isShowMessage) {
                     Toast.makeText(context,

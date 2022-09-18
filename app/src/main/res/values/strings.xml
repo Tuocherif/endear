@@ -15,6 +15,7 @@
     <string name="Sign_In_explanation">Connectez-vous à l\'aide de votre adresse e-mail</string>
     <string name="Sign_In_with_Google">Connectez-vous avec Google</string>
     <string name="aeon_corporation">aeon corporation</string>
+    <string name="powered">Powered by</string>
     <string name="wait">Veuillez patienter…</string>
     <string name="find_people">Chercher un proche</string>
     <string name="Notifications">Notifications</string>
@@ -41,7 +42,7 @@
     <string name="settings">Paramètres</string>
     <string name="ImageMenu">ImageMenu</string>
 
-    <string name="menu_home">Home</string>
+    <string name="menu_home">Mes proches</string>
     <string name="menu_game">Endear</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>

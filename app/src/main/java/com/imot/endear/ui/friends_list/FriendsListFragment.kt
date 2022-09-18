@@ -41,6 +41,7 @@ import com.imot.endear.utils.Common.fireBaseUser
 import com.imot.endear.utils.Common.loggedUser
 import com.mancj.materialsearchbar.MaterialSearchBar
 
+/*Here appears the list of friends who can send an alert or an invitation to play the bonus game.*/
 class FriendsListFragment : Fragment(), IfirebaseLoadDone {
 
     private var _binding: FragmentFriendslistBinding? = null
@@ -212,7 +213,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                holder.tv_user_name.text = model.name
+                holder.tv_user_name_u.text = model.name
 
                 //Event
 
@@ -243,7 +244,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             fireBaseUser.displayName!!,
         fireBaseUser.photoUrl!!.toString())
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
-            .child(loggedUser!!.uid)
+            .child(loggedUser.uid!!)
             .child(Common.ACCEPT_LIST)
 
         val options = FirebaseRecyclerOptions.Builder<User>()
@@ -258,7 +259,7 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
             }
 
             override fun onBindViewHolder(holder: UserViewHolder, position: Int, model: User) {
-                holder.tv_user_name.text = model.name
+                holder.tv_user_name_u.text = model.name
 
                 //Event
 

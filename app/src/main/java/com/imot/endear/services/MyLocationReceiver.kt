@@ -30,7 +30,7 @@ class MyLocationReceiver: BroadcastReceiver() {
                     val location = result.lastLocation
                     if (Common.loggedUser != null){
                         //App is running
-                        publicLocation.child(Common.loggedUser!!.uid).setValue(location)
+                        publicLocation.child(Common.loggedUser.uid!!).setValue(location)
                     }else{
                         //App in killed mode
                         publicLocation.child(uid).setValue(location)
