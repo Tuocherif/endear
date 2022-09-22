@@ -17,7 +17,8 @@ import com.imot.endear.databinding.ActivityTrackingBinding
 import com.imot.endear.model.MyLocation
 import com.imot.endear.utils.Common
 
-/*Activity inflates when clicking on the alert sent in the FriendRequestFragment to track down the person who sent it on map.*/
+/*Activity inflated when clicking on the alert sent in the FriendRequestFragment to track down the person who sent it on map.*/
+
 class TrackingActivity : AppCompatActivity(), OnMapReadyCallback, ValueEventListener {
 
     private lateinit var mMap: GoogleMap

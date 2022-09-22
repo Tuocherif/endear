@@ -776,10 +776,10 @@ class MainActivity : AppCompatActivity(),
                                                             }
                                                         }
                                                             Common.loggedUser =
-                                                                User(Common.fireBaseUser!!.uid,
-                                                                    Common.fireBaseUser.email!!,
-                                                                    Common.fireBaseUser.displayName!!,
-                                                                    Common.fireBaseUser.photoUrl.toString())
+                                                                User(Common.FROM_UID,
+                                                                    Common.FROM_EMAIL,
+                                                                    Common.FROM_NAME,
+                                                                    Common.FROM_IMAGE)
 
                                                             //Save UID to storage to update location from killed mode
                                                             Paper.book()

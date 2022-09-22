@@ -5,18 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.preference.PreferenceFragment
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
 import com.firebase.ui.auth.AuthUI.getApplicationContext
@@ -24,12 +18,11 @@ import com.imot.endear.HomeActivity
 import com.imot.endear.MainActivity
 import com.imot.endear.R
 import com.imot.endear.databinding.FragmentSettingsBinding
-import com.imot.endear.ui.add_people.AddPeopleFragment
+import com.imot.endear.ui.endear.EndearFragment
 import com.imot.endear.ui.find_people.FindPeopleFragment
 import com.imot.endear.ui.friends_list.FriendsListFragment
 import com.imot.endear.ui.sign_out_fragment.SignOutFragment
-import com.imot.endear.ui.sign_out_fragment.SignOutViewModel
-import java.util.zip.Inflater
+
 
 
 class SettingsFragment : PreferenceFragmentCompat(),
@@ -133,7 +126,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         intent = Intent(getApplicationContext(), FindPeopleFragment::class.java)
         startActivity(intent)
 
-        intent = Intent(getApplicationContext(), AddPeopleFragment::class.java)
+        intent = Intent(getApplicationContext(), EndearFragment::class.java)
         startActivity(intent)
 
         intent = Intent(getApplicationContext(), SignOutFragment::class.java)

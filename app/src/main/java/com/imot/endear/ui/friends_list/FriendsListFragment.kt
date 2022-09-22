@@ -239,10 +239,10 @@ class FriendsListFragment : Fragment(), IfirebaseLoadDone {
 
     private fun loadFriendList(){
         loggedUser =
-        User(fireBaseUser!!.uid,
-            fireBaseUser.email!!,
-            fireBaseUser.displayName!!,
-        fireBaseUser.photoUrl!!.toString())
+        User(Common.FROM_UID,
+            Common.FROM_EMAIL,
+            Common.FROM_NAME,
+            Common.FROM_IMAGE)
         val query = FirebaseDatabase.getInstance().getReference(Common.USER_INFORMATION)
             .child(loggedUser.uid!!)
             .child(Common.ACCEPT_LIST)
