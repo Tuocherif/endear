@@ -1,9 +1,15 @@
 package com.imot.endear
 
+import android.content.ActivityNotFoundException
 import android.content.ContentValues.TAG
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.MediaController
+import android.widget.Toast
+import android.widget.VideoView
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -26,6 +32,10 @@ class TrackingActivity : AppCompatActivity(), OnMapReadyCallback, ValueEventList
 
     private lateinit var trackingUserLocation : DatabaseReference
 
+    private lateinit var videoView : VideoView
+
+    val REQUEST_VIDEO_CAPTURE = 1968
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -34,11 +44,47 @@ class TrackingActivity : AppCompatActivity(), OnMapReadyCallback, ValueEventList
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+            .findFragmentById(R.id.map_track) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        videoView = findViewById(R.id.videoView)
+
+        // Media controller for play, pause, ...
+        val mediaControl = MediaController(this)
+        mediaControl.setAnchorView(videoView)
+        videoView.setMediaController(mediaControl)
+
+//        val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+//
+//        try {
+//            startActivityForResult(takeVideoIntent,REQUEST_VIDEO_CAPTURE)
+//        }catch (e:ActivityNotFoundException){
+//            Toast.makeText(this, "Impossible d'accéder à la caméra" +e.localizedMessage, Toast.LENGTH_SHORT).show()
+//        }
+
         registerEventRealtime()
+        spyView()
     } //end onCreate
+
+    private fun spyView() {
+        val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+
+        try {
+            startActivityForResult(takeVideoIntent,REQUEST_VIDEO_CAPTURE)
+        }catch (e:ActivityNotFoundException){
+            Toast.makeText(this, "Impossible d'accéder à la caméra" +e.localizedMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK){
+            val videoUri = data?.data
+            videoView.setVideoURI(videoUri)
+            videoView.start()
+        }
+    }
 
     private fun registerEventRealtime() {
         trackingUserLocation = FirebaseDatabase.getInstance()

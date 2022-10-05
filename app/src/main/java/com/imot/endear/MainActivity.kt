@@ -296,6 +296,43 @@ class MainActivity : AppCompatActivity(),
                 }
             }).check()
 
+        Dexter.withContext(this)
+            .withPermission(Manifest.permission.CAMERA)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(response: PermissionGrantedResponse) {
+
+//                   Intent(this@MainActivity, MainActivity::class.java).also {
+//                        startActivity(it)
+////                        putExtraData(Common.loggedUser)
+//
+//                    }
+                    if(isConnected(this@MainActivity)){
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Vous êtes connecté à Internet.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "L'application requiert cette permission pour fonctionner correctement.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    //finish()
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permission: PermissionRequest?,
+                    token: PermissionToken?,
+                ) {
+                    token!!.continuePermissionRequest()
+                }
+            }).check()
+
                 // Configure Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.web_client_id))
